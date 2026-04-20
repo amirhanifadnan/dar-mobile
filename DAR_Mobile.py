@@ -601,6 +601,53 @@ def generate_dar(tpl_data, units, new_serials, info, block_data):
             cr += len(fr); bn = 0
 
     ws.print_area = f'$A$1:$U${lr}'
+
+    # ─── Sheet 2: All Photos ───────────────────────────────────────────────────
+    try:
+        ws2 = wb.create_sheet(title='Photos')
+        headers = ['No', 'Serial No', 'Full Lantern', 'Serial Label', 'Issue', 'Lampu Test', 'SPD', 'Driver']
+        from openpyxl.styles import PatternFill as PF2
+        hfill = PF2('solid', start_color='1A56DB')
+        hfont = Font(bold=True, color='FFFFFF', size=11)
+        for ci, h in enumerate(headers, 1):
+            c = ws2.cell(row=1, column=ci, value=h)
+            c.fill = hfill; c.font = hfont
+            c.alignment = Alignment(horizontal='center', vertical='center')
+
+        ws2.column_dimensions['A'].width = 5
+        ws2.column_dimensions['B'].width = 24
+        for ltr in ['C','D','E','F','G','H']:
+            ws2.column_dimensions[ltr].width = 22
+        ws2.row_dimensions[1].height = 25
+        ws2.freeze_panes = 'A2'
+
+        ALL_PH = ['full', 'serial', 'issue', 'lampu_test', 'spd', 'driver']
+        for i, unit in enumerate(units):
+            imgs2 = unit.get('imgs', {})
+            ext2  = unit.get('extracted', {})
+            serial2 = ext2.get('serial', f"Unit {i+1}")
+            row2 = i + 2
+            ws2.row_dimensions[row2].height = 150
+            ws2.cell(row=row2, column=1, value=i+1).alignment = Alignment(horizontal='center', vertical='center')
+            ws2.cell(row=row2, column=2, value=serial2).alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+
+            for ci2, ptype in enumerate(ALL_PH):
+                col2 = ci2 + 3
+                if ptype in imgs2 and imgs2[ptype]:
+                    try:
+                        pil2 = PILImage.open(io.BytesIO(imgs2[ptype])).convert('RGB')
+                        ibuf2 = io.BytesIO(); pil2.save(ibuf2, format='JPEG', quality=85); ibuf2.seek(0)
+                        xli2 = XLImage(ibuf2)
+                        anc2 = TwoCellAnchor(); anc2.editAs = 'twoCell'
+                        anc2._from = AnchorMarker(col=col2-1, colOff=cm_to_EMU(0.05), row=row2-1, rowOff=cm_to_EMU(0.05))
+                        anc2.to    = AnchorMarker(col=col2,   colOff=-cm_to_EMU(0.05), row=row2,   rowOff=-cm_to_EMU(0.05))
+                        xli2.anchor = anc2
+                        ws2.add_image(xli2)
+                    except Exception as pe:
+                        ws2.cell(row=row2, column=col2, value='N/A')
+    except Exception as e:
+        print(f"  Sheet2 photos error: {e}")
+
     buf = io.BytesIO(); wb.save(buf); buf.seek(0); return buf.read()
 
 # ─── State ─────────────────────────────────────────────────────────────────────
@@ -1140,31 +1187,12 @@ async function generate(){
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       window._lastDarBlob=blob; window._lastDarFname=fname;
       window._lastCollageBlob=null; window._lastCollageFname='';
-
-      // Fetch photos ZIP if available
-      const hasCollage=r.headers.get('X-Has-Collage')==='1';
-      if(hasCollage){
-        try{
-          const cr2=await fetch('/get_collage');
-          if(cr2.ok){
-            const cblob=await cr2.blob();
-            const cfname=`Photos_${contract}_${info.ticket||'output'}.xlsx`;
-            window._lastCollageBlob=cblob; window._lastCollageFname=cfname;
-            // Auto-download ZIP
-            const ca2=document.createElement('a');
-            ca2.href=URL.createObjectURL(cblob); ca2.download=cfname;
-            document.body.appendChild(ca2); ca2.click(); document.body.removeChild(ca2);
-          }
-        }catch(e){console.log('zip fetch error',e);}
-      }
-
       pfill.style.width='100%';
-      const collageNote=window._lastCollageBlob?' + Photos Excel':'';
       document.getElementById('gen-msg').innerHTML=
-        `<div class="sbox s-ok" style="margin-top:8px">✓ Berjaya! DAR Excel${collageNote} downloaded.<br>
+        `<div class="sbox s-ok" style="margin-top:8px">✓ Berjaya! DAR Excel downloaded (2 sheets: DAR Report + Photos).<br>
         <button onclick="shareWhatsApp()" style="margin-top:8px;width:100%;background:#25D366;color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.121 1.532 5.847L.057 23.882l6.196-1.624A11.96 11.96 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.96 0-3.794-.5-5.394-1.376L3 21.5l.9-3.474A9.967 9.967 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-          Hantar ke WhatsApp (${window._lastCollageBlob?'2 files':'1 file'})
+          Hantar ke WhatsApp
         </button></div>`;
     }else{
       const err=await r.text();
@@ -1183,13 +1211,8 @@ async function shareWhatsApp(){
   const darBlob = window._lastDarBlob;
   if(!darBlob){ alert('File belum ready. Generate dulu!'); return; }
 
-  const files = [];
-  files.push(new File([darBlob], window._lastDarFname,
-    {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
-  if(window._lastCollageBlob){
-    files.push(new File([window._lastCollageBlob], window._lastCollageFname,
-      {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
-  }
+  const files = [new File([darBlob], window._lastDarFname,
+    {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})];
 
   const ticket  = document.getElementById('f-ticket').value||'';
   const station = document.getElementById('f-station').value||'';
@@ -1197,7 +1220,6 @@ async function shareWhatsApp(){
   const staff   = document.getElementById('f-staffname').value||'';
   const shareText = `DAR Report - SNFOR SDN BHD\nTicket: ${ticket}\nStation: ${station}\nContract: ${contract}${staff?'\nStaff: '+staff:''}`;
 
-  // Try Web Share API (iOS Safari 15+, Android Chrome)
   if(navigator.canShare && navigator.canShare({files})){
     try{
       await navigator.share({ files, title: window._lastDarFname, text: shareText });
@@ -1206,7 +1228,6 @@ async function shareWhatsApp(){
       if(e.name==='AbortError') return;
     }
   }
-  // Fallback: open WhatsApp with text only (files already downloaded)
   window.open(`https://wa.me/?text=${encodeURIComponent(shareText+'\n\nSila semak file yang dah download.')}`, '_blank');
 }
 </script>
@@ -1516,14 +1537,9 @@ class Handler(BaseHTTPRequestHandler):
 
                 out = generate_dar(tpl, units_list, new_serials, info, block_data)
 
-                # Build photos Excel (all 6 photos per unit, shareable via WhatsApp)
-                photos_xlsx = make_photos_xlsx(units_list, info)
-                STATE['last_collage'] = photos_xlsx
-
                 self.send_response(200)
                 self.send_header('Content-Type','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
                 self.send_header('Content-Disposition', f'attachment; filename="DAR_Report.xlsx"')
-                self.send_header('X-Has-Collage', '1' if photos_xlsx else '0')
                 self.send_header('Content-Length', len(out))
                 self.end_headers(); self.wfile.write(out)
 
