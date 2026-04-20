@@ -388,86 +388,45 @@ def add_qr_cell(ws, img_bytes, block_row):
         ws.add_image(xl)
     except Exception as e: print(f"  QR image error: {e}")
 
-def make_component_collage(units_list, info):
+def make_photos_zip(units_list, info):
     """
-    Compile lampu_test, spd, driver photos from all units into one JPG grid.
-    Layout: each unit = 1 row of 3 photos, units stacked vertically.
-    Returns JPEG bytes or None if no component photos found.
+    Create a ZIP file containing all photos named by serial number.
+    Each unit: serial_full.jpg, serial_serial.jpg, serial_issue.jpg,
+               serial_lampu_test.jpg, serial_spd.jpg, serial_driver.jpg
+    Returns ZIP bytes or None if no photos found.
     """
     try:
-        THUMB_W, THUMB_H = 400, 300
-        LABEL_H = 28
-        PAD = 6
-        BG = (245, 245, 245)
-        TEXT_COLOR = (50, 50, 50)
-
-        from PIL import ImageDraw, ImageFont
-
-        rows = []
-        for i, unit in enumerate(units_list):
-            imgs = unit.get('imgs', {})
-            ext  = unit.get('extracted', {})
-            serial = ext.get('serial', f"Unit {i+1}")
-            row_imgs = []
-            for ptype in COMPONENT_PHOTOS:
-                if ptype in imgs and imgs[ptype]:
-                    try:
-                        pil = PILImage.open(io.BytesIO(imgs[ptype])).convert('RGB')
-                        pil = pil.resize((THUMB_W, THUMB_H), PILImage.LANCZOS)
-                    except:
-                        pil = PILImage.new('RGB', (THUMB_W, THUMB_H), (220, 220, 220))
-                else:
-                    pil = PILImage.new('RGB', (THUMB_W, THUMB_H), (220, 220, 220))
-                row_imgs.append(pil)
-            rows.append((serial, row_imgs))
-
-        if not rows: return None
-
-        labels = {'lampu_test': 'Lampu Test', 'spd': 'SPD', 'driver': 'Driver'}
-        col_labels = [labels[p] for p in COMPONENT_PHOTOS]
-        n_cols = 3
-
-        ROW_H   = THUMB_H + LABEL_H + PAD
-        HDR_H   = 40
-        UNIT_H  = LABEL_H + ROW_H + PAD
-        TOTAL_W = n_cols * (THUMB_W + PAD) + PAD
-        TOTAL_H = HDR_H + len(rows) * UNIT_H + PAD
-
-        canvas = PILImage.new('RGB', (TOTAL_W, TOTAL_H), BG)
-        draw   = ImageDraw.Draw(canvas)
-        try:    font_big  = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 16)
-        except: font_big  = ImageFont.load_default()
-        try:    font_sm   = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 12)
-        except: font_sm   = ImageFont.load_default()
-
-        # Header
-        ticket   = info.get('ticket','')
-        station  = info.get('station','')
-        hdr_text = f"Komponen Photos — Ticket {ticket}  |  Station: {station}"
-        draw.text((PAD, 10), hdr_text, fill=TEXT_COLOR, font=font_big)
-
-        # Column headers
-        for ci, lbl in enumerate(col_labels):
-            x = PAD + ci * (THUMB_W + PAD)
-            draw.text((x + THUMB_W//2 - 30, HDR_H - 4), lbl, fill=(80,80,200), font=font_sm)
-
-        y_start = HDR_H
-        for serial, row_imgs in rows:
-            # Unit serial label row
-            draw.rectangle([PAD, y_start, TOTAL_W-PAD, y_start+LABEL_H], fill=(200,220,255))
-            draw.text((PAD+6, y_start+6), f"Serial: {serial}", fill=(20,20,120), font=font_sm)
-            y_img = y_start + LABEL_H
-            for ci, img in enumerate(row_imgs):
-                x = PAD + ci * (THUMB_W + PAD)
-                canvas.paste(img, (x, y_img))
-            y_start += UNIT_H
-
+        import zipfile
+        ALL_TYPES = ['full', 'serial', 'issue', 'lampu_test', 'spd', 'driver']
         buf = io.BytesIO()
-        canvas.save(buf, format='JPEG', quality=88)
+        any_photo = False
+        with zipfile.ZipFile(buf, 'w', zipfile.ZIP_DEFLATED) as zf:
+            for i, unit in enumerate(units_list):
+                imgs = unit.get('imgs', {})
+                ext  = unit.get('extracted', {})
+                # Use serial number as filename prefix, fallback to unit number
+                serial = ext.get('serial', f"Unit_{i+1}")
+                # Clean serial for filename (remove slashes, spaces)
+                serial_clean = serial.replace('/', '-').replace(' ', '_').replace('\\', '-')
+                for ptype in ALL_TYPES:
+                    if ptype in imgs and imgs[ptype]:
+                        try:
+                            # Convert to JPEG
+                            pil = PILImage.open(io.BytesIO(imgs[ptype])).convert('RGB')
+                            img_buf = io.BytesIO()
+                            pil.save(img_buf, format='JPEG', quality=90)
+                            img_buf.seek(0)
+                            fname = f"{serial_clean}_{ptype}.jpg"
+                            zf.writestr(fname, img_buf.read())
+                            any_photo = True
+                        except Exception as e:
+                            print(f"  ZIP photo error {ptype}: {e}")
+        if not any_photo:
+            return None
         buf.seek(0)
         return buf.read()
     except Exception as e:
-        print(f"  Collage error: {e}")
+        print(f"  ZIP error: {e}")
         return None
 
 
@@ -1136,25 +1095,25 @@ async function generate(){
       window._lastDarBlob=blob; window._lastDarFname=fname;
       window._lastCollageBlob=null; window._lastCollageFname='';
 
-      // Fetch collage JPG if available
+      // Fetch photos ZIP if available
       const hasCollage=r.headers.get('X-Has-Collage')==='1';
       if(hasCollage){
         try{
           const cr2=await fetch('/get_collage');
           if(cr2.ok){
             const cblob=await cr2.blob();
-            const cfname=`Komponen_${contract}_${info.ticket||'output'}.jpg`;
+            const cfname=`Photos_${contract}_${info.ticket||'output'}.zip`;
             window._lastCollageBlob=cblob; window._lastCollageFname=cfname;
-            // Auto-download collage too
+            // Auto-download ZIP
             const ca2=document.createElement('a');
             ca2.href=URL.createObjectURL(cblob); ca2.download=cfname;
             document.body.appendChild(ca2); ca2.click(); document.body.removeChild(ca2);
           }
-        }catch(e){console.log('collage fetch error',e);}
+        }catch(e){console.log('zip fetch error',e);}
       }
 
       pfill.style.width='100%';
-      const collageNote=window._lastCollageBlob?' + Gambar Komponen':'';
+      const collageNote=window._lastCollageBlob?' + Photos ZIP':'';
       document.getElementById('gen-msg').innerHTML=
         `<div class="sbox s-ok" style="margin-top:8px">✓ Berjaya! DAR Excel${collageNote} downloaded.<br>
         <button onclick="shareWhatsApp()" style="margin-top:8px;width:100%;background:#25D366;color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
@@ -1183,7 +1142,7 @@ async function shareWhatsApp(){
     {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
   if(window._lastCollageBlob){
     files.push(new File([window._lastCollageBlob], window._lastCollageFname,
-      {type:'image/jpeg'}));
+      {type:'application/zip'}));
   }
 
   const ticket  = document.getElementById('f-ticket').value||'';
@@ -1336,12 +1295,12 @@ class Handler(BaseHTTPRequestHandler):
             saved = STATE['template'] is not None or os.path.exists(TEMPLATE_CACHE)
             self._json({'saved':saved})
         elif self.path == '/get_collage':
-            collage = STATE.get('last_collage')
-            if collage:
+            photos_zip = STATE.get('last_collage')
+            if photos_zip:
                 self.send_response(200)
-                self.send_header('Content-Type','image/jpeg')
-                self.send_header('Content-Length', len(collage))
-                self.end_headers(); self.wfile.write(collage)
+                self.send_header('Content-Type','application/zip')
+                self.send_header('Content-Length', len(photos_zip))
+                self.end_headers(); self.wfile.write(photos_zip)
             else:
                 self.send_response(204); self.end_headers()
 
@@ -1511,14 +1470,14 @@ class Handler(BaseHTTPRequestHandler):
 
                 out = generate_dar(tpl, units_list, new_serials, info, block_data)
 
-                # Build component photo collage and store server-side
-                collage = make_component_collage(units_list, info)
-                STATE['last_collage'] = collage  # store for /get_collage endpoint
+                # Build photos ZIP (all 6 photos per unit named by serial)
+                photos_zip = make_photos_zip(units_list, info)
+                STATE['last_collage'] = photos_zip  # reuse same endpoint /get_collage
 
                 self.send_response(200)
                 self.send_header('Content-Type','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
                 self.send_header('Content-Disposition', f'attachment; filename="DAR_Report.xlsx"')
-                self.send_header('X-Has-Collage', '1' if collage else '0')
+                self.send_header('X-Has-Collage', '1' if photos_zip else '0')
                 self.send_header('Content-Length', len(out))
                 self.end_headers(); self.wfile.write(out)
 
