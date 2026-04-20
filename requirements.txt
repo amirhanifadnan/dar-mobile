@@ -1,4 +1,0 @@
-﻿openpyxl==3.1.2
-Pillow
-qrcode==7.4.2
-zxing-cpp==2.2.0
