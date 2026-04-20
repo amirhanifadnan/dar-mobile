@@ -503,23 +503,23 @@ def generate_dar(tpl_data, units, new_serials, info, block_data):
 
     write_rows(ws, hr, 1); write_merges(ws, hm)
 
-    # Header field mapping — use top-left of each merged range (writable cells only)
-    # Row 5: D5:E5=Ticket, H5:I5=Station, J5:K5=?, L5:M5=PIC label, N5:O5=PIC val, S5:U5=TotalQty
-    # Confirmed writable: J5, N5, S5, J6, N6, S6, J7, N7, S7
-    # E5/E6/E7 are MergedCell (read-only) → use D5, D6, D7 (top-left of D:E merge)
+    # Header field mapping — exact pink box cells from template
+    # Row 5: F5=Ticket, J5=Station, N5=PIC, S5=TotalQty
+    # Row 6: F6=SiteDate, J6=Contract, N6=DefModel, S6=DefQty
+    # Row 7: F7=DONo, J7=DODate, N7=NewModel, S7=Delivery
     hmap = {
-        'ticket':   (5,4),   # D5 top-left of D5:E5
-        'station':  (5,8),   # H5 top-left of H5:I5
-        'pic':      (5,14),  # N5 top-left of N5:O5
-        'totalqty': (5,19),  # S5 top-left of S5:U5
-        'sitedate': (6,4),   # D6 top-left of D6:E6
-        'contract': (6,8),   # H6 top-left of H6:I6
-        'defmodel': (6,14),  # N6 top-left of N6:O6
-        'defqty':   (6,16),  # P6 top-left of P6:R6
-        'dono':     (7,4),   # D7 top-left of D7:E7
-        'dodate':   (7,8),   # H7 top-left of H7:I7
-        'newmodel': (7,14),  # N7 top-left of N7:O7
-        'delivery': (7,19),  # S7 top-left of S7:U7
+        'ticket':   (5,6),   # F5
+        'station':  (5,10),  # J5
+        'pic':      (5,14),  # N5
+        'totalqty': (5,19),  # S5
+        'sitedate': (6,6),   # F6
+        'contract': (6,10),  # J6
+        'defmodel': (6,14),  # N6
+        'defqty':   (6,19),  # S6
+        'dono':     (7,6),   # F7
+        'dodate':   (7,10),  # J7
+        'newmodel': (7,14),  # N7
+        'delivery': (7,19),  # S7
     }
     for key, (row, col) in hmap.items():
         val = info.get(key,'')
@@ -528,7 +528,7 @@ def generate_dar(tpl_data, units, new_serials, info, block_data):
     # Auto-fill from first unit extracted data
     for u in units:
         ext = u.get('extracted',{})
-        if not info.get('contract') and ext.get('contract'): safe_write(ws, 6, 8, ext['contract'])
+        if not info.get('contract') and ext.get('contract'): safe_write(ws, 6, 10, ext['contract'])
         if not info.get('defmodel') and ext.get('defmodel'): safe_write(ws, 6, 14, ext['defmodel'])
         if ext.get('contract') or ext.get('defmodel'): break
 
@@ -801,6 +801,11 @@ select{width:100%;background:var(--bg);border:1.5px solid var(--border);border-r
         <input type="text" id="f-deliverydate" placeholder="08-2023"></div>
       <div class="field"><label class="lbl">Delivery Location</label>
         <input type="text" id="f-delivery" placeholder="KKB Store"></div>
+    </div>
+    <div class="field">
+      <label class="lbl" style="color:var(--accent);font-weight:700;">👷 SNFOR Staff Name</label>
+      <input type="text" id="f-staffname" placeholder="Nama staff yang pergi site" 
+        style="border-color:var(--accent);font-weight:600;">
     </div>
   </div>
 
@@ -1105,6 +1110,7 @@ async function generate(){
     newmodel:     document.getElementById('f-newmodel').value,
     dodate:       document.getElementById('f-deliverydate').value,
     delivery:     document.getElementById('f-delivery').value,
+    staffname:    document.getElementById('f-staffname').value,
   };
   fd.append('info', JSON.stringify(info));
 
@@ -1183,7 +1189,8 @@ async function shareWhatsApp(){
   const ticket  = document.getElementById('f-ticket').value||'';
   const station = document.getElementById('f-station').value||'';
   const contract= document.getElementById('f-contract').value||'';
-  const shareText = `DAR Report - SNFOR SDN BHD\nTicket: ${ticket}\nStation: ${station}\nContract: ${contract}`;
+  const staff   = document.getElementById('f-staffname').value||'';
+  const shareText = `DAR Report - SNFOR SDN BHD\nTicket: ${ticket}\nStation: ${station}\nContract: ${contract}${staff?'\nStaff: '+staff:''}`;
 
   // Try Web Share API (iOS Safari 15+, Android Chrome)
   if(navigator.canShare && navigator.canShare({files})){
@@ -1554,39 +1561,44 @@ def print_qr_terminal(url):
     except: pass
 
 def main():
-    port = 5679
+    # Railway uses PORT env var; fallback to 5679 for local
+    port = int(os.environ.get('PORT', 5679))
+    is_railway = 'RAILWAY_ENVIRONMENT' in os.environ or ('PORT' in os.environ and os.environ.get('PORT') != '5679')
     ip = get_local_ip()
+
     print("="*55)
-    print("   DAR MOBILE v1.0 - SNFOR SDN BHD")
+    print("   DAR MOBILE v2.0 - SNFOR SDN BHD")
     print("="*55)
     print(f"\n✓ Running on port {port}")
     print(f"  AI: {ai_name()}")
+    print(f"  Mode: {'☁ Railway Cloud' if is_railway else '🖥 Local'}")
 
-    # Try ngrok
-    use_ngrok = os.environ.get('USE_NGROK', '1') == '1'
-    public_url = None
-
-    if use_ngrok:
-        print("\n  Starting ngrok tunnel...")
-        public_url = start_ngrok(port)
-
-    print()
-    if public_url:
-        print("="*55)
-        print("  🌐 PUBLIC URL (guna data phone):")
-        print(f"  {public_url}")
-        print("="*55)
-        print("\n  📱 Scan QR code ni dari iPhone:")
-        print_qr_terminal(public_url)
-        print(f"\n  Atau taip URL: {public_url}")
+    if is_railway:
+        domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN', '')
+        public_url = f"https://{domain}" if domain else None
+        if public_url:
+            print(f"\n  🌐 PUBLIC URL: {public_url}")
+            print("\n  📱 QR Code untuk workers:")
+            print_qr_terminal(public_url)
+        else:
+            print("\n  ⚠ Railway domain belum ready...")
     else:
-        print("="*55)
-        print("  📱 LOCAL URL (kena WiFi sama):")
-        print(f"  http://{ip}:{port}")
-        print("="*55)
-        print("\n  ⚠ Untuk akses dari luar WiFi:")
-        print("  1. Set NGROK_AUTHTOKEN dalam run_mobile.bat")
-        print("  2. Atau set USE_NGROK=1")
+        use_ngrok = os.environ.get('USE_NGROK', '1') == '1'
+        public_url = None
+        if use_ngrok:
+            print("\n  Starting ngrok tunnel...")
+            public_url = start_ngrok(port)
+        if public_url:
+            print("="*55)
+            print("  🌐 PUBLIC URL:")
+            print(f"  {public_url}")
+            print("="*55)
+            print("\n  📱 Scan QR:")
+            print_qr_terminal(public_url)
+        else:
+            print("="*55)
+            print(f"  📱 LOCAL: http://{ip}:{port}")
+            print("="*55)
 
     print("\n  Press Ctrl+C to stop.\n")
 
