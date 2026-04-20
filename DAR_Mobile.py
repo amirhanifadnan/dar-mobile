@@ -388,45 +388,91 @@ def add_qr_cell(ws, img_bytes, block_row):
         ws.add_image(xl)
     except Exception as e: print(f"  QR image error: {e}")
 
-def make_photos_zip(units_list, info):
+def make_photos_xlsx(units_list, info):
     """
-    Create a ZIP file containing all photos named by serial number.
-    Each unit: serial_full.jpg, serial_serial.jpg, serial_issue.jpg,
-               serial_lampu_test.jpg, serial_spd.jpg, serial_driver.jpg
-    Returns ZIP bytes or None if no photos found.
+    Create an Excel file with all 6 photos per unit, one row per unit.
+    Columns: Serial No | Full | Serial Label | Issue | Lampu Test | SPD | Driver
+    Returns xlsx bytes or None if no photos found.
     """
     try:
-        import zipfile
+        from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+        wb2 = Workbook()
+        ws2 = wb2.active
+        ws2.title = 'Photos'
+
+        # Header row
+        headers = ['No', 'Serial No', 'Full Lantern', 'Serial Label', 'Issue', 'Lampu Test', 'SPD', 'Driver']
+        header_fill = PatternFill('solid', start_color='1A56DB')
+        header_font = Font(bold=True, color='FFFFFF', size=11)
+        for ci, h in enumerate(headers, 1):
+            c = ws2.cell(row=1, column=ci, value=h)
+            c.fill = header_fill
+            c.font = header_font
+            c.alignment = Alignment(horizontal='center', vertical='center')
+
+        # Column widths
+        ws2.column_dimensions['A'].width = 5   # No
+        ws2.column_dimensions['B'].width = 22  # Serial
+        for col_letter in ['C','D','E','F','G','H']:
+            ws2.column_dimensions[col_letter].width = 22
+
+        IMG_H_CM = 5.5
+        IMG_W_CM = 5.5
+        ROW_H_PT = 150  # ~5.3cm
+
         ALL_TYPES = ['full', 'serial', 'issue', 'lampu_test', 'spd', 'driver']
-        buf = io.BytesIO()
         any_photo = False
-        with zipfile.ZipFile(buf, 'w', zipfile.ZIP_DEFLATED) as zf:
-            for i, unit in enumerate(units_list):
-                imgs = unit.get('imgs', {})
-                ext  = unit.get('extracted', {})
-                # Use serial number as filename prefix, fallback to unit number
-                serial = ext.get('serial', f"Unit_{i+1}")
-                # Clean serial for filename (remove slashes, spaces)
-                serial_clean = serial.replace('/', '-').replace(' ', '_').replace('\\', '-')
-                for ptype in ALL_TYPES:
-                    if ptype in imgs and imgs[ptype]:
-                        try:
-                            # Convert to JPEG
-                            pil = PILImage.open(io.BytesIO(imgs[ptype])).convert('RGB')
-                            img_buf = io.BytesIO()
-                            pil.save(img_buf, format='JPEG', quality=90)
-                            img_buf.seek(0)
-                            fname = f"{serial_clean}_{ptype}.jpg"
-                            zf.writestr(fname, img_buf.read())
-                            any_photo = True
-                        except Exception as e:
-                            print(f"  ZIP photo error {ptype}: {e}")
+
+        for i, unit in enumerate(units_list):
+            imgs = unit.get('imgs', {})
+            ext  = unit.get('extracted', {})
+            serial = ext.get('serial', f"Unit {i+1}")
+            row = i + 2
+
+            ws2.row_dimensions[row].height = ROW_H_PT
+
+            # No & Serial
+            ws2.cell(row=row, column=1, value=i+1).alignment = Alignment(horizontal='center', vertical='center')
+            ws2.cell(row=row, column=2, value=serial).alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+
+            # Photos — columns 3-8
+            for ci, ptype in enumerate(ALL_TYPES):
+                col = ci + 3
+                if ptype in imgs and imgs[ptype]:
+                    try:
+                        pil = PILImage.open(io.BytesIO(imgs[ptype])).convert('RGB')
+                        img_buf = io.BytesIO()
+                        pil.save(img_buf, format='JPEG', quality=85)
+                        img_buf.seek(0)
+                        xl_img = XLImage(img_buf)
+
+                        # Use TwoCellAnchor to snap to cell
+                        anchor = TwoCellAnchor()
+                        anchor.editAs = 'twoCell'
+                        anchor._from = AnchorMarker(col=col-1, colOff=cm_to_EMU(0.05),
+                                                    row=row-1,  rowOff=cm_to_EMU(0.05))
+                        anchor.to    = AnchorMarker(col=col,   colOff=-cm_to_EMU(0.05),
+                                                    row=row,    rowOff=-cm_to_EMU(0.05))
+                        xl_img.anchor = anchor
+                        ws2.add_image(xl_img)
+                        any_photo = True
+                    except Exception as e:
+                        print(f"  Photos xlsx img error: {e}")
+                        ws2.cell(row=row, column=col, value='N/A')
+
         if not any_photo:
             return None
+
+        # Row 1 height
+        ws2.row_dimensions[1].height = 25
+        ws2.freeze_panes = 'A2'
+
+        buf = io.BytesIO()
+        wb2.save(buf)
         buf.seek(0)
         return buf.read()
     except Exception as e:
-        print(f"  ZIP error: {e}")
+        print(f"  Photos xlsx error: {e}")
         return None
 
 
@@ -1102,7 +1148,7 @@ async function generate(){
           const cr2=await fetch('/get_collage');
           if(cr2.ok){
             const cblob=await cr2.blob();
-            const cfname=`Photos_${contract}_${info.ticket||'output'}.zip`;
+            const cfname=`Photos_${contract}_${info.ticket||'output'}.xlsx`;
             window._lastCollageBlob=cblob; window._lastCollageFname=cfname;
             // Auto-download ZIP
             const ca2=document.createElement('a');
@@ -1113,7 +1159,7 @@ async function generate(){
       }
 
       pfill.style.width='100%';
-      const collageNote=window._lastCollageBlob?' + Photos ZIP':'';
+      const collageNote=window._lastCollageBlob?' + Photos Excel':'';
       document.getElementById('gen-msg').innerHTML=
         `<div class="sbox s-ok" style="margin-top:8px">✓ Berjaya! DAR Excel${collageNote} downloaded.<br>
         <button onclick="shareWhatsApp()" style="margin-top:8px;width:100%;background:#25D366;color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
@@ -1142,7 +1188,7 @@ async function shareWhatsApp(){
     {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
   if(window._lastCollageBlob){
     files.push(new File([window._lastCollageBlob], window._lastCollageFname,
-      {type:'application/zip'}));
+      {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
   }
 
   const ticket  = document.getElementById('f-ticket').value||'';
@@ -1295,12 +1341,12 @@ class Handler(BaseHTTPRequestHandler):
             saved = STATE['template'] is not None or os.path.exists(TEMPLATE_CACHE)
             self._json({'saved':saved})
         elif self.path == '/get_collage':
-            photos_zip = STATE.get('last_collage')
-            if photos_zip:
+            photos_xlsx = STATE.get('last_collage')
+            if photos_xlsx:
                 self.send_response(200)
-                self.send_header('Content-Type','application/zip')
-                self.send_header('Content-Length', len(photos_zip))
-                self.end_headers(); self.wfile.write(photos_zip)
+                self.send_header('Content-Type','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                self.send_header('Content-Length', len(photos_xlsx))
+                self.end_headers(); self.wfile.write(photos_xlsx)
             else:
                 self.send_response(204); self.end_headers()
 
@@ -1470,14 +1516,14 @@ class Handler(BaseHTTPRequestHandler):
 
                 out = generate_dar(tpl, units_list, new_serials, info, block_data)
 
-                # Build photos ZIP (all 6 photos per unit named by serial)
-                photos_zip = make_photos_zip(units_list, info)
-                STATE['last_collage'] = photos_zip  # reuse same endpoint /get_collage
+                # Build photos Excel (all 6 photos per unit, shareable via WhatsApp)
+                photos_xlsx = make_photos_xlsx(units_list, info)
+                STATE['last_collage'] = photos_xlsx
 
                 self.send_response(200)
                 self.send_header('Content-Type','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
                 self.send_header('Content-Disposition', f'attachment; filename="DAR_Report.xlsx"')
-                self.send_header('X-Has-Collage', '1' if photos_zip else '0')
+                self.send_header('X-Has-Collage', '1' if photos_xlsx else '0')
                 self.send_header('Content-Length', len(out))
                 self.end_headers(); self.wfile.write(out)
 
