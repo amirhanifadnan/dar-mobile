@@ -1,0 +1,6 @@
+﻿openpyxl
+Pillow
+qrcode
+zxing-cpp
+gspread
+google-auth
