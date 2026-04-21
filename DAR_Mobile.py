@@ -23,10 +23,12 @@ def install(pkg):
     import subprocess
     subprocess.check_call([sys.executable, "-m", "pip", "install", pkg, "-q"])
 
-for pkg in ["openpyxl", "Pillow", "qrcode", "zxing-cpp"]:
+for pkg in ["openpyxl", "Pillow", "qrcode", "zxing-cpp", "gspread", "google-auth"]:
     try:
         if pkg == "Pillow": __import__("PIL")
         elif pkg == "zxing-cpp": __import__("zxingcpp")
+        elif pkg == "gspread": __import__("gspread")
+        elif pkg == "google-auth": __import__("google.oauth2.service_account")
         else: __import__(pkg)
     except (ImportError, Exception):
         try:
@@ -651,12 +653,87 @@ def generate_dar(tpl_data, units, new_serials, info, block_data):
     buf = io.BytesIO(); wb.save(buf); buf.seek(0); return buf.read()
 
 # ─── State ─────────────────────────────────────────────────────────────────────
+import datetime
+
+DAR_HISTORY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dar_history.json')
+
+def load_history():
+    try:
+        if os.path.exists(DAR_HISTORY_FILE):
+            with open(DAR_HISTORY_FILE,'r',encoding='utf-8') as f:
+                return json.load(f)
+    except: pass
+    return []
+
+def save_history(history):
+    try:
+        with open(DAR_HISTORY_FILE,'w',encoding='utf-8') as f:
+            json.dump(history, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"  History save error: {e}")
+
+def sync_to_gsheet(record):
+    """Append one DAR record to Google Sheet."""
+    try:
+        import gspread
+        from google.oauth2.service_account import Credentials
+
+        sheet_id  = os.environ.get('GOOGLE_SHEET_ID', '')
+        creds_env = os.environ.get('GOOGLE_CREDENTIALS', '')
+
+        if not sheet_id:
+            print("  GSheet: GOOGLE_SHEET_ID not set"); return
+
+        if os.path.exists('/etc/secrets/credentials.json'):
+            creds = Credentials.from_service_account_file(
+                '/etc/secrets/credentials.json',
+                scopes=['https://www.googleapis.com/auth/spreadsheets']
+            )
+        elif creds_env:
+            import json as _json
+            creds_info = _json.loads(creds_env)
+            creds = Credentials.from_service_account_info(
+                creds_info,
+                scopes=['https://www.googleapis.com/auth/spreadsheets']
+            )
+        else:
+            print("  GSheet: No credentials found"); return
+
+        gc = gspread.authorize(creds)
+        sh = gc.open_by_key(sheet_id)
+        ws = sh.sheet1
+
+        # Check header — row_count selalu 1000, guna cell value check
+        first_cell = ws.cell(1, 1).value
+        if not first_cell or first_cell != 'Date':
+            ws.clear()
+            ws.insert_row(['Date','Ticket','Station','Contract','Staff','Units','Filename'], 1)
+            print("  GSheet: Header row created")
+
+        ws.append_row([
+            record.get('date', ''),
+            record.get('ticket', ''),
+            record.get('station', ''),
+            record.get('contract', ''),
+            record.get('staff', ''),
+            record.get('units', ''),
+            record.get('filename', ''),
+        ], value_input_option='USER_ENTERED')
+        print(f"  ✓ Synced to Google Sheets: Ticket {record.get('ticket')}")
+
+    except Exception as e:
+        import traceback
+        print(f"  GSheet sync error: {e}")
+        traceback.print_exc()
+
 STATE = {
     'template': None,
     'units': [],
     'new_serials': [],
     'dar_info': {},
     'last_collage': None,
+    'history': load_history(),  # list of {id, ticket, station, contract, staff, date, units, filename}
+    'dar_files': {},             # id -> xlsx bytes (in-memory cache)
     'email_config': {
         'address': os.environ.get('OUTLOOK_EMAIL', ''),
         'password': os.environ.get('OUTLOOK_PASSWORD', ''),
@@ -804,9 +881,19 @@ select{width:100%;background:var(--bg);border:1.5px solid var(--border);border-r
     <span class="hdr-title">DAR Mobile</span>
     <div class="hdr-ai"><div class="ai-dot off" id="ai-dot"></div><span id="ai-lbl">AI...</span></div>
   </div>
+  <div style="display:flex;gap:8px;margin-top:10px;">
+    <button id="tab-generate" onclick="switchTab('generate')"
+      style="flex:1;padding:7px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;background:rgba(255,255,255,0.25);color:#fff;">
+      📋 Generate
+    </button>
+    <button id="tab-history" onclick="switchTab('history')"
+      style="flex:1;padding:7px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);">
+      📁 History
+    </button>
+  </div>
 </div>
 
-<div class="content">
+<div class="content" id="tab-generate-content">
 
   <!-- STATUS -->
   <div id="status-box" class="sbox s-warn" style="margin-bottom:12px;">⚠ Tambah lantern dan ambik gambar untuk mula</div>
@@ -874,7 +961,19 @@ select{width:100%;background:var(--bg);border:1.5px solid var(--border);border-r
   <div id="gen-msg" style="margin-top:8px;"></div>
   <div class="safe-bottom"></div>
 
-</div><!-- /content -->
+</div><!-- /tab-generate-content -->
+
+<!-- HISTORY TAB -->
+<div class="content" id="tab-history-content" style="display:none;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+    <div style="font-size:15px;font-weight:700;color:var(--text);">📁 DAR History</div>
+    <div id="hist-count" style="font-size:11px;color:var(--muted);"></div>
+  </div>
+  <div id="history-list">
+    <div class="sbox s-warn">Tiada rekod lagi. Generate DAR dulu!</div>
+  </div>
+  <div class="safe-bottom"></div>
+</div>
 
 <script>
 const CAUSES=['LED Driver','LED Module','SPD','Natural Disaster','N/A'];
@@ -1111,11 +1210,71 @@ async function capturePhoto(uid, type, input){
   }
 }
 
-function toggleEmailCfg(on){
-  // kept for compatibility
+function toggleEmailCfg(on){}
+function saveEmailCfg(){}
+
+function switchTab(tab){
+  const isGen = tab==='generate';
+  document.getElementById('tab-generate-content').style.display = isGen?'block':'none';
+  document.getElementById('tab-history-content').style.display  = isGen?'none':'block';
+  document.getElementById('tab-generate').style.background = isGen?'rgba(255,255,255,0.25)':'rgba(255,255,255,0.1)';
+  document.getElementById('tab-generate').style.color      = isGen?'#fff':'rgba(255,255,255,0.7)';
+  document.getElementById('tab-history').style.background  = isGen?'rgba(255,255,255,0.1)':'rgba(255,255,255,0.25)';
+  document.getElementById('tab-history').style.color       = isGen?'rgba(255,255,255,0.7)':'#fff';
+  if(!isGen) loadHistory();
 }
 
-function saveEmailCfg(){}
+async function loadHistory(){
+  try{
+    const r=await fetch('/history');
+    const data=await r.json();
+    const list=document.getElementById('history-list');
+    document.getElementById('hist-count').textContent=`${data.length} rekod`;
+    if(data.length===0){
+      list.innerHTML='<div class="sbox s-warn">Tiada rekod lagi. Generate DAR dulu!</div>';
+      return;
+    }
+    list.innerHTML=data.map(rec=>`
+      <div class="card" style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <div>
+            <div style="font-size:15px;font-weight:700;color:var(--accent);">🎫 Ticket: ${rec.ticket}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">📅 ${rec.date}</div>
+          </div>
+          <button onclick="deleteRecord('${rec.id}')"
+            style="background:var(--red-bg);color:var(--red);border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;">✕ Buang</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;margin-bottom:10px;">
+          <div><span style="color:var(--muted);">📍 Station</span><br><b>${rec.station}</b></div>
+          <div><span style="color:var(--muted);">🔢 Units</span><br><b>${rec.units} unit</b></div>
+          <div><span style="color:var(--muted);">📋 Contract</span><br><b>${rec.contract}</b></div>
+          <div><span style="color:var(--muted);">👷 Staff</span><br><b>${rec.staff}</b></div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:8px;font-family:monospace;background:var(--bg);padding:4px 8px;border-radius:6px;">${rec.filename}</div>
+        <button onclick="downloadRecord('${rec.id}')"
+          style="width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;">
+          ⬇ Download Excel
+        </button>
+      </div>
+    `).join('');
+  }catch(e){
+    document.getElementById('history-list').innerHTML='<div class="sbox s-err">✗ Error load history</div>';
+  }
+}
+
+function downloadRecord(id){
+  const a=document.createElement('a');
+  a.href=`/download/${id}`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+async function deleteRecord(id){
+  if(!confirm('Delete rekod ni?')) return;
+  await fetch(`/delete/${id}`);
+  loadHistory();
+}
+
+
 
 function updateStatus(){
   const box=document.getElementById('status-box');
@@ -1392,6 +1551,29 @@ class Handler(BaseHTTPRequestHandler):
                 self.end_headers(); self.wfile.write(photos_xlsx)
             else:
                 self.send_response(204); self.end_headers()
+        elif self.path == '/history':
+            self._json(STATE['history'])
+        elif self.path.startswith('/download/'):
+            rec_id = self.path.split('/download/')[-1]
+            xlsx = STATE['dar_files'].get(rec_id)
+            if xlsx:
+                rec = next((r for r in STATE['history'] if r['id']==rec_id), {})
+                fname = rec.get('filename','DAR_Report.xlsx')
+                self.send_response(200)
+                self.send_header('Content-Type','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                self.send_header('Content-Disposition', f'attachment; filename="{fname}"')
+                self.send_header('Content-Length', len(xlsx))
+                self.end_headers(); self.wfile.write(xlsx)
+            else:
+                b = b'File not available (server restarted)'
+                self.send_response(404); self.send_header('Content-Type','text/plain')
+                self.send_header('Content-Length',len(b)); self.end_headers(); self.wfile.write(b)
+        elif self.path.startswith('/delete/'):
+            rec_id = self.path.split('/delete/')[-1]
+            STATE['history'] = [r for r in STATE['history'] if r['id'] != rec_id]
+            STATE['dar_files'].pop(rec_id, None)
+            save_history(STATE['history'])
+            self._json({'ok':True})
 
     def do_POST(self):
         path = urlparse(self.path).path
@@ -1558,6 +1740,34 @@ class Handler(BaseHTTPRequestHandler):
                 new_serials = [m.get('new_serial','') for m in metadata]
 
                 out = generate_dar(tpl, units_list, new_serials, info, block_data)
+
+                # Save to history
+                import datetime as _dt
+                rec_id = str(int(_dt.datetime.now().timestamp() * 1000))
+                contract_clean = info.get('contract','').replace('/','_').replace(' ','_') or 'DAR'
+                ticket = info.get('ticket','') or 'NoTicket'
+                fname = f"DAR_{contract_clean}_{ticket}.xlsx"
+                record = {
+                    'id':       rec_id,
+                    'ticket':   info.get('ticket','—'),
+                    'station':  info.get('station','—'),
+                    'contract': info.get('contract','—'),
+                    'staff':    info.get('staffname','—'),
+                    'date':     _dt.datetime.now().strftime('%d/%m/%Y %H:%M'),
+                    'units':    len(metadata),
+                    'filename': fname,
+                }
+                STATE['history'].insert(0, record)  # newest first
+                STATE['dar_files'][rec_id] = out    # cache file in memory
+                # Keep only last 50 records in memory
+                if len(STATE['history']) > 50:
+                    old = STATE['history'][50:]
+                    STATE['history'] = STATE['history'][:50]
+                    for o in old:
+                        STATE['dar_files'].pop(o['id'], None)
+                save_history(STATE['history'])
+                # Sync to Google Sheets in background thread
+                threading.Thread(target=sync_to_gsheet, args=(record,), daemon=True).start()
 
                 self.send_response(200)
                 self.send_header('Content-Type','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
