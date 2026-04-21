@@ -678,24 +678,28 @@ def sync_to_gsheet(record):
         import gspread
         from google.oauth2.service_account import Credentials
 
-        sheet_id  = os.environ.get('GOOGLE_SHEET_ID', '')
-        creds_env = os.environ.get('GOOGLE_CREDENTIALS', '')
+        # Load credentials from Secret File or env var
+        creds_path = '/etc/secrets/credentials.json'
+        creds_env  = os.environ.get('GOOGLE_CREDENTIALS','')
+        sheet_id   = os.environ.get('GOOGLE_SHEET_ID','')
 
         if not sheet_id:
             print("  GSheet: GOOGLE_SHEET_ID not set"); return
 
-        if os.path.exists('/etc/secrets/credentials.json'):
+        if os.path.exists(creds_path):
             creds = Credentials.from_service_account_file(
-                '/etc/secrets/credentials.json',
+                creds_path,
                 scopes=['https://www.googleapis.com/auth/spreadsheets']
             )
         elif creds_env:
-            import json as _json
-            creds_info = _json.loads(creds_env)
-            creds = Credentials.from_service_account_info(
-                creds_info,
+            import tempfile
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+                f.write(creds_env); tmp = f.name
+            creds = Credentials.from_service_account_file(
+                tmp,
                 scopes=['https://www.googleapis.com/auth/spreadsheets']
             )
+            os.unlink(tmp)
         else:
             print("  GSheet: No credentials found"); return
 
@@ -703,28 +707,23 @@ def sync_to_gsheet(record):
         sh = gc.open_by_key(sheet_id)
         ws = sh.sheet1
 
-        # Check header — row_count selalu 1000, guna cell value check
-        first_cell = ws.cell(1, 1).value
-        if not first_cell or first_cell != 'Date':
-            ws.clear()
+        # Add header if sheet is empty
+        if ws.row_count == 0 or ws.cell(1,1).value != 'Date':
             ws.insert_row(['Date','Ticket','Station','Contract','Staff','Units','Filename'], 1)
-            print("  GSheet: Header row created")
 
+        # Append record
         ws.append_row([
-            record.get('date', ''),
-            record.get('ticket', ''),
-            record.get('station', ''),
-            record.get('contract', ''),
-            record.get('staff', ''),
-            record.get('units', ''),
-            record.get('filename', ''),
-        ], value_input_option='USER_ENTERED')
+            record.get('date',''),
+            record.get('ticket',''),
+            record.get('station',''),
+            record.get('contract',''),
+            record.get('staff',''),
+            record.get('units',''),
+            record.get('filename',''),
+        ])
         print(f"  ✓ Synced to Google Sheets: Ticket {record.get('ticket')}")
-
     except Exception as e:
-        import traceback
         print(f"  GSheet sync error: {e}")
-        traceback.print_exc()
 
 STATE = {
     'template': None,
@@ -1011,10 +1010,16 @@ function fillField(id,val){
   return true;
 }
 
+function updateDefQty(){
+  const el=document.getElementById('f-defqty');
+  if(el) el.value = units.length > 0 ? units.length+' Nos' : '';
+}
+
 function addUnit(){
   const id=++unitIdCounter;
   units.push({id, files:{}, extracted:{}, cause:'', action:'', rca:'', lamputest:'', processing:false});
   renderUnits();
+  updateDefQty();
   // Scroll to new unit
   setTimeout(()=>{
     const el=document.getElementById('unit-'+id);
@@ -1025,6 +1030,7 @@ function addUnit(){
 function removeUnit(id){
   units=units.filter(u=>u.id!==id);
   renderUnits(); updateStatus();
+  updateDefQty();
 }
 
 function renderUnits(){
