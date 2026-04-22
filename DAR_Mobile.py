@@ -755,272 +755,728 @@ STATE['template'] = load_template()
 
 # ─── HTML Mobile UI ────────────────────────────────────────────────────────────
 HTML = r'''<!DOCTYPE html>
-<html lang="ms">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="DAR Mobile">
-<meta name="apple-mobile-web-app-title" content="DAR Mobile">
-<meta name="theme-color" content="#1A56DB">
-<meta name="description" content="DAR Mobile - SNFOR SDN BHD">
-<link rel="apple-touch-icon" href="data:image/png;base64,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">
-<link rel="manifest" href="/manifest.json">
-<title>DAR Mobile</title>
+<meta name="theme-color" content="#0F2557">
+<title>DAR Portal — SNFOR</title>
 <style>
 :root{
-  --bg:#F0F2F5;--card:#fff;--border:#DDE3ED;
-  --accent:#1A56DB;--accent-light:#EBF0FF;
-  --green:#057A55;--green-bg:#D1FAE5;
-  --red:#991B1B;--red-bg:#FEE2E2;
-  --yellow:#92400E;--yellow-bg:#FEF3C7;
-  --text:#111827;--muted:#6B7280;
+  --navy:#0F2557;--navy2:#1A3A7C;--accent:#2563EB;--accent2:#1D4ED8;
+  --green:#059669;--green-bg:#D1FAE5;--green-text:#065F46;
+  --yellow:#D97706;--yellow-bg:#FEF3C7;--yellow-text:#92400E;
+  --red:#DC2626;--red-bg:#FEE2E2;--red-text:#991B1B;
+  --blue-bg:#EFF6FF;--blue-text:#1E40AF;
+  --bg:#F1F5F9;--card:#FFFFFF;--border:#E2E8F0;
+  --text:#0F172A;--muted:#64748B;--light:#F8FAFC;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;min-height:100vh;padding-bottom:100px;}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',Segoe UI,sans-serif;min-height:100vh;}
 
-/* Header */
-.hdr{background:var(--accent);padding:16px 16px 12px;padding-top:calc(16px + env(safe-area-inset-top));position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+/* ── SPLASH / HOME ── */
+#home-screen{
+  min-height:100vh;
+  background:linear-gradient(160deg,#0F2557 0%,#1A3A7C 50%,#2563EB 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:32px 24px;padding-top:calc(32px + env(safe-area-inset-top));
+}
+.home-logo{
+  width:80px;height:80px;background:rgba(255,255,255,0.12);border-radius:20px;
+  display:flex;align-items:center;justify-content:center;margin-bottom:16px;
+  border:1.5px solid rgba(255,255,255,0.2);backdrop-filter:blur(10px);
+}
+.home-logo span{font-size:28px;font-weight:800;color:#fff;letter-spacing:-1px;}
+.home-company{font-size:11px;font-weight:600;color:rgba(255,255,255,0.6);letter-spacing:.15em;text-transform:uppercase;margin-bottom:6px;}
+.home-title{font-size:26px;font-weight:800;color:#fff;text-align:center;margin-bottom:6px;letter-spacing:-.5px;}
+.home-subtitle{font-size:13px;color:rgba(255,255,255,0.65);text-align:center;margin-bottom:40px;}
+.home-divider{width:40px;height:3px;background:rgba(255,255,255,0.25);border-radius:2px;margin:0 auto 32px;}
+
+.home-cards{width:100%;max-width:380px;display:flex;flex-direction:column;gap:14px;}
+.home-card{
+  background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);
+  border-radius:18px;padding:20px;cursor:pointer;
+  display:flex;align-items:center;gap:16px;
+  transition:all .2s;backdrop-filter:blur(10px);
+}
+.home-card:active{transform:scale(0.97);background:rgba(255,255,255,0.15);}
+.home-card-icon{
+  width:52px;height:52px;border-radius:14px;display:flex;align-items:center;
+  justify-content:center;font-size:24px;flex-shrink:0;
+}
+.home-card-icon.history{background:rgba(250,204,21,0.15);}
+.home-card-icon.generate{background:rgba(52,211,153,0.15);}
+.home-card-body{flex:1;}
+.home-card-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:3px;}
+.home-card-desc{font-size:12px;color:rgba(255,255,255,0.6);line-height:1.4;}
+.home-card-arrow{font-size:18px;color:rgba(255,255,255,0.4);}
+.home-badge{
+  display:inline-block;background:rgba(250,204,21,0.2);border:1px solid rgba(250,204,21,0.3);
+  color:#FCD34D;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:6px;
+}
+
+.home-footer{
+  margin-top:40px;font-size:10px;color:rgba(255,255,255,0.35);text-align:center;letter-spacing:.05em;
+}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh;}
+.screen.active{display:block;}
+
+/* ── HEADER ── */
+.hdr{
+  background:var(--navy);
+  padding:14px 16px 12px;
+  padding-top:calc(14px + env(safe-area-inset-top));
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 12px rgba(15,37,87,0.3);
+}
 .hdr-row{display:flex;align-items:center;gap:10px;}
-.hdr-logo{background:rgba(255,255,255,.15);border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:13px;}
-.hdr-title{color:#fff;font-size:16px;font-weight:600;flex:1;}
-.hdr-ai{font-size:11px;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:5px;}
+.hdr-back{
+  width:34px;height:34px;border-radius:10px;
+  background:rgba(255,255,255,0.1);border:none;
+  color:#fff;font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.hdr-title{color:#fff;font-size:16px;font-weight:700;flex:1;}
+.hdr-sub{font-size:10px;color:rgba(255,255,255,0.55);margin-top:1px;}
+.hdr-ai{font-size:11px;color:rgba(255,255,255,0.65);display:flex;align-items:center;gap:5px;}
 .ai-dot{width:7px;height:7px;border-radius:50%;background:#34D399;}
-.ai-dot.off{background:#9CA3AF;}
+.ai-dot.off{background:#94A3B8;}
 
-/* Main content */
-.content{padding:14px;}
+/* ── HISTORY SCREEN ── */
+.content{padding:14px;padding-bottom:80px;}
 
-/* Cards */
-.card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);}
-.card-title{font-size:13px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
-.step-badge{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.step-badge.done{background:var(--green);}
+/* Stats bar */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.stat-card{background:var(--card);border-radius:12px;padding:10px 8px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.stat-num{font-size:20px;font-weight:800;color:var(--navy);}
+.stat-lbl{font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
 
-/* Camera / Upload buttons */
-.cam-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;}
-.cam-btn{position:relative;aspect-ratio:1;border-radius:12px;border:2px dashed var(--border);background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;overflow:hidden;transition:all .2s;}
-.cam-btn.captured{border-style:solid;border-color:var(--green);}
-.cam-btn input{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0;}
-.cam-icon{font-size:26px;}
-.cam-label{font-size:10px;color:var(--muted);font-weight:500;text-align:center;}
-.cam-thumb{position:absolute;inset:0;object-fit:cover;border-radius:10px;}
-.cam-check{position:absolute;top:6px;right:6px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;}
+/* Search & Filter */
+.search-bar{
+  background:var(--card);border-radius:12px;padding:10px 14px;
+  display:flex;align-items:center;gap:10px;margin-bottom:10px;
+  box-shadow:0 1px 3px rgba(0,0,0,.06);border:1.5px solid var(--border);
+}
+.search-bar input{
+  flex:1;border:none;outline:none;font-size:14px;color:var(--text);background:transparent;
+  font-family:inherit;
+}
+.search-bar input::placeholder{color:var(--muted);}
+.search-icon{font-size:16px;color:var(--muted);}
 
-/* Add unit button */
-.add-unit-btn{width:100%;padding:14px;border-radius:12px;border:2px dashed var(--accent);background:var(--accent-light);color:var(--accent);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;}
+.filter-row{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;}
+.filter-row::-webkit-scrollbar{display:none;}
+.filter-btn{
+  flex-shrink:0;padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);
+  background:var(--card);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;
+  font-family:inherit;white-space:nowrap;
+}
+.filter-btn.active{background:var(--navy);border-color:var(--navy);color:#fff;}
 
-/* Unit cards */
-.unit-card{background:var(--bg);border-radius:10px;border:1px solid var(--border);padding:10px 12px;margin-bottom:8px;}
-.unit-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.unit-sn{font-size:12px;font-weight:600;font-family:monospace;color:var(--accent);}
-.unit-status{font-size:10px;display:flex;gap:4px;flex-wrap:wrap;}
-.tag{display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;}
-.tag-g{background:var(--green-bg);color:var(--green);}
-.tag-y{background:var(--yellow-bg);color:var(--yellow);}
-.tag-b{background:var(--accent-light);color:var(--accent);}
-.del-btn{background:var(--red-bg);color:var(--red);border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;}
+/* Section label */
+.sec-lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
 
-/* Fields */
+/* Ticket cards */
+.ticket-card{
+  background:var(--card);border-radius:14px;margin-bottom:10px;
+  box-shadow:0 1px 4px rgba(0,0,0,.07);border:1px solid var(--border);
+  overflow:hidden;cursor:pointer;transition:all .15s;
+}
+.ticket-card:active{transform:scale(0.985);}
+.tc-header{padding:12px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.tc-left{flex:1;}
+.tc-ticket{font-size:15px;font-weight:800;color:var(--navy);font-family:monospace;}
+.tc-location{font-size:13px;color:var(--text);font-weight:600;margin-top:1px;}
+.tc-contract{font-size:11px;color:var(--muted);margin-top:2px;}
+.tc-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+.status-badge{
+  display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;
+  white-space:nowrap;
+}
+.s-closed{background:var(--green-bg);color:var(--green-text);}
+.s-progress{background:var(--yellow-bg);color:var(--yellow-text);}
+.s-docs{background:var(--blue-bg);color:var(--blue-text);}
+.tc-date{font-size:10px;color:var(--muted);}
+
+.tc-body{padding:0 14px 12px;border-top:1px solid var(--border);padding-top:10px;}
+.tc-detail-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;}
+.defect-tag{
+  display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;
+  background:var(--red-bg);color:var(--red-text);
+}
+.tc-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
+.tc-meta-item{font-size:11px;}
+.tc-meta-lbl{color:var(--muted);font-weight:600;}
+.tc-meta-val{color:var(--text);font-weight:500;font-family:monospace;font-size:10px;}
+
+/* Detail modal */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{
+  background:var(--card);border-radius:24px 24px 0 0;width:100%;max-width:500px;
+  max-height:88vh;overflow-y:auto;padding:0 0 env(safe-area-inset-bottom,20px);
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.34,1.2,.64,1);
+}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0;}
+.modal-header{padding:16px 20px;border-bottom:1px solid var(--border);}
+.modal-ticket{font-size:22px;font-weight:800;color:var(--navy);font-family:monospace;}
+.modal-location{font-size:15px;color:var(--text);font-weight:600;margin-top:2px;}
+.modal-body{padding:16px 20px;}
+.detail-section{margin-bottom:18px;}
+.detail-section-title{
+  font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.12em;margin-bottom:10px;display:flex;align-items:center;gap:6px;
+}
+.detail-section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.detail-item{background:var(--light);border-radius:10px;padding:10px 12px;}
+.detail-item.full{grid-column:1/-1;}
+.detail-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px;}
+.detail-val{font-size:13px;font-weight:600;color:var(--text);}
+.detail-val.mono{font-family:monospace;font-size:12px;}
+.defect-list{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+
+/* Upload zone */
+.upload-section{background:var(--light);border:2px dashed var(--border);border-radius:14px;padding:20px;text-align:center;cursor:pointer;position:relative;margin-bottom:12px;}
+.upload-section input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.upload-icon{font-size:32px;margin-bottom:8px;}
+.upload-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;}
+.upload-desc{font-size:12px;color:var(--muted);}
+.upload-done{font-size:12px;color:var(--green);font-weight:600;margin-top:8px;font-family:monospace;}
+
+/* Generate screen tabs */
+.tab-bar{display:flex;background:rgba(255,255,255,0.1);border-radius:10px;padding:3px;margin-top:10px;gap:3px;}
+.tab-btn{
+  flex:1;padding:7px;border:none;border-radius:8px;
+  font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;
+  background:transparent;color:rgba(255,255,255,0.6);transition:all .2s;
+}
+.tab-btn.active{background:rgba(255,255,255,0.2);color:#fff;}
+
+/* Cards & Fields */
+.card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.07);}
+.card-title{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;color:var(--navy);}
 .field{margin-bottom:10px;}
-.lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px;}
-input[type=text],input[type=date]{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;font-size:15px;padding:10px 12px;outline:none;-webkit-appearance:none;}
+.lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px;}
+input[type=text],input[type=date]{
+  width:100%;background:var(--light);border:1.5px solid var(--border);
+  border-radius:10px;color:var(--text);font-family:inherit;font-size:15px;
+  padding:10px 12px;outline:none;-webkit-appearance:none;
+}
 input:focus{border-color:var(--accent);background:#fff;}
 .auto-filled{border-color:var(--green)!important;background:#F0FDF4!important;}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.ai-badge{display:inline-block;padding:1px 5px;background:var(--green-bg);color:var(--green);border-radius:3px;font-size:9px;font-weight:600;margin-left:4px;vertical-align:middle;}
+.ai-badge{display:inline-block;padding:1px 5px;background:var(--green-bg);color:var(--green-text);border-radius:3px;font-size:9px;font-weight:700;margin-left:4px;vertical-align:middle;}
+select{
+  width:100%;background:var(--light);border:1.5px solid var(--border);
+  border-radius:10px;color:var(--text);font-size:15px;padding:10px 12px;
+  outline:none;-webkit-appearance:none;font-family:inherit;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
 
-
-/* Status */
-.sbox{padding:10px 14px;border-radius:10px;font-size:12px;font-family:monospace;line-height:1.5;}
-.s-ok{background:var(--green-bg);color:var(--green);}
-.s-warn{background:var(--yellow-bg);color:var(--yellow);}
-.s-err{background:var(--red-bg);color:var(--red);}
-.s-info{background:var(--accent-light);color:var(--accent);}
-
-/* Dropdowns */
-select{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-size:15px;padding:10px 12px;outline:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+/* Camera grid */
+.cam-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;}
+.cam-thumb{position:absolute;inset:0;object-fit:cover;border-radius:10px;}
+.cam-check{position:absolute;top:6px;right:6px;background:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;}
 
 /* Buttons */
-.btn-primary{width:100%;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:16px;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;}
-.btn-secondary{width:100%;background:var(--accent-light);color:var(--accent);border:1.5px solid var(--accent);border-radius:12px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;margin-bottom:8px;}
-.btn-primary:disabled{opacity:.5;}
+.btn-primary{
+  width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;border:none;border-radius:12px;padding:16px;
+  font-size:16px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-family:inherit;box-shadow:0 4px 12px rgba(37,99,235,0.3);
+}
+.btn-primary:disabled{opacity:.5;box-shadow:none;}
+.btn-secondary{
+  width:100%;background:var(--blue-bg);color:var(--accent);
+  border:1.5px solid var(--accent);border-radius:12px;padding:12px;
+  font-size:14px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-family:inherit;margin-bottom:8px;
+}
+.add-unit-btn{
+  width:100%;padding:14px;border-radius:12px;
+  border:2px dashed var(--accent);background:var(--blue-bg);
+  color:var(--accent);font-size:14px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;
+  font-family:inherit;
+}
+.del-btn{background:var(--red-bg);color:var(--red-text);border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;}
+
+/* Status boxes */
+.sbox{padding:10px 14px;border-radius:10px;font-size:12px;font-family:monospace;line-height:1.5;}
+.s-ok{background:var(--green-bg);color:var(--green-text);}
+.s-warn{background:var(--yellow-bg);color:var(--yellow-text);}
+.s-err{background:var(--red-bg);color:var(--red-text);}
+.s-info{background:var(--blue-bg);color:var(--blue-text);}
 
 /* Progress */
 .prog{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin:8px 0;display:none;}
 .prog-fill{height:100%;background:var(--accent);transition:width .3s;width:0;}
 
-/* Bottom safe area */
-.safe-bottom{height:env(safe-area-inset-bottom,20px);}
-
-/* Sections */
-.sec-lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:16px 0 8px;display:flex;align-items:center;gap:6px;}
-.sec-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
-
-/* Upload zone */
-.upload-zone{border:1.5px dashed var(--border);border-radius:10px;padding:14px;text-align:center;background:var(--bg);cursor:pointer;position:relative;}
-.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;}
-.upload-zone .uz-done{font-size:11px;color:var(--green);font-family:monospace;margin-top:4px;}
+/* Unit card */
+.unit-card{background:var(--light);border-radius:10px;border:1px solid var(--border);padding:10px 12px;margin-bottom:8px;}
+.unit-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.unit-sn{font-size:12px;font-weight:700;font-family:monospace;color:var(--accent);}
+.tag{display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;}
+.tag-g{background:var(--green-bg);color:var(--green-text);}
+.tag-y{background:var(--yellow-bg);color:var(--yellow-text);}
+.tag-b{background:var(--blue-bg);color:var(--blue-text);}
 
 /* Spin */
 .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
 @keyframes spin{to{transform:rotate(360deg);}}
+.proc-bar{background:var(--blue-bg);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--accent);font-family:monospace;margin-top:6px;}
 
-/* Processing overlay */
-.proc-bar{background:var(--accent-light);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--accent);font-family:monospace;margin-top:6px;}
+.tpl-warn{background:var(--red-bg);border:1px solid #FCA5A5;border-radius:10px;padding:10px 14px;font-size:12px;color:var(--red-text);margin-bottom:12px;display:none;}
+
+.safe-bottom{height:calc(env(safe-area-inset-bottom,0px) + 20px);}
+
+/* History record card */
+.hist-card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.07);}
 </style>
 </head>
 <body>
 
-<div class="hdr">
-  <div class="hdr-row">
-    <div class="hdr-logo">DAR</div>
-    <span class="hdr-title">DAR Mobile</span>
-    <div class="hdr-ai"><div class="ai-dot off" id="ai-dot"></div><span id="ai-lbl">AI...</span></div>
+<!-- ══════════════ HOME SCREEN ══════════════ -->
+<div id="home-screen">
+  <div class="home-logo"><span>DAR</span></div>
+  <div class="home-company">SNFOR SDN BHD</div>
+  <div class="home-title">Defect Analysis Report</div>
+  <div class="home-subtitle">SMB Lanterns — Athena Series</div>
+  <div class="home-divider"></div>
+
+  <div class="home-cards">
+    <div class="home-card" onclick="showScreen('history-screen')">
+      <div class="home-card-icon history">📁</div>
+      <div class="home-card-body">
+        <div class="home-card-title">Ticket History</div>
+        <div class="home-card-desc">View all previous DAR records, defect reports &amp; closed tickets</div>
+        <div class="home-badge" id="total-badge">Loading...</div>
+      </div>
+      <div class="home-card-arrow">›</div>
+    </div>
+
+    <div class="home-card" onclick="showScreen('generate-screen')">
+      <div class="home-card-icon generate">📋</div>
+      <div class="home-card-body">
+        <div class="home-card-title">Generate DAR Report</div>
+        <div class="home-card-desc">Capture site photos, scan QR codes &amp; generate Excel report</div>
+        <div class="home-badge" style="background:rgba(52,211,153,0.15);border-color:rgba(52,211,153,0.3);color:#6EE7B7;">New Report</div>
+      </div>
+      <div class="home-card-arrow">›</div>
+    </div>
   </div>
-  <div style="display:flex;gap:8px;margin-top:10px;">
-    <button id="tab-generate" onclick="switchTab('generate')"
-      style="flex:1;padding:7px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;background:rgba(255,255,255,0.25);color:#fff;">
-      📋 Generate
-    </button>
-    <button id="tab-history" onclick="switchTab('history')"
-      style="flex:1;padding:7px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);">
-      📁 History
-    </button>
+
+  <div class="home-footer">DAR Portal v2.0 &nbsp;·&nbsp; Internal Use Only</div>
+</div>
+
+<!-- ══════════════ HISTORY SCREEN ══════════════ -->
+<div id="history-screen" class="screen">
+  <div class="hdr">
+    <div class="hdr-row">
+      <button class="hdr-back" onclick="showHome()">‹</button>
+      <div style="flex:1">
+        <div class="hdr-title">Ticket History</div>
+        <div class="hdr-sub">SMB DAR List — Athena Series</div>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.6)" id="rec-count"></div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-total">—</div>
+        <div class="stat-lbl">Total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" style="color:var(--green)" id="stat-closed">—</div>
+        <div class="stat-lbl">Closed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" style="color:var(--yellow)" id="stat-progress">—</div>
+        <div class="stat-lbl">In Progress</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" style="color:var(--blue-text)" id="stat-docs">—</div>
+        <div class="stat-lbl">Docs Sub.</div>
+      </div>
+    </div>
+
+    <!-- Upload new data -->
+    <div class="upload-section" id="upload-zone" style="margin-bottom:12px;">
+      <input type="file" accept=".xlsx,.xls" onchange="uploadTicketData(this)">
+      <div class="upload-icon">📊</div>
+      <div class="upload-title">Update Ticket Data</div>
+      <div class="upload-desc">Upload new tracking Excel to refresh records</div>
+      <div class="upload-done" id="upload-done" style="display:none"></div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Search ticket no., location, contract..." oninput="filterTickets()">
+    </div>
+
+    <!-- Filter pills -->
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+      <button class="filter-btn" onclick="setFilter('closed',this)">✅ Closed</button>
+      <button class="filter-btn" onclick="setFilter('progress',this)">🔄 In Progress</button>
+      <button class="filter-btn" onclick="setFilter('docs',this)">📄 Docs Submitted</button>
+    </div>
+
+    <div class="sec-lbl">
+      <span id="list-label">All Records</span>
+      <span id="list-count" style="font-size:11px;color:var(--muted);font-weight:600;text-transform:none;letter-spacing:0;"></span>
+    </div>
+
+    <div id="ticket-list"></div>
+    <div class="safe-bottom"></div>
   </div>
 </div>
 
-<div class="content" id="tab-generate-content">
-
-  <!-- STATUS -->
-  <div id="status-box" class="sbox s-warn" style="margin-bottom:12px;">⚠ Tambah lantern dan ambik gambar untuk mula</div>
-
-  <!-- TEMPLATE STATUS -->
-  <div id="tpl-status-box" class="sbox s-err" style="margin-bottom:12px;display:none;">⚠ Template belum ready — hubungi supervisor untuk setup.</div>
-
-  <!-- UNITS / PHOTOS -->
-  <div class="sec-lbl">Gambar Lantern</div>
-
-  <div id="units-list"></div>
-
-  <button class="add-unit-btn" onclick="addUnit()">
-    <span style="font-size:20px;">+</span> Tambah Lantern
-  </button>
-
-  <!-- DAR INFO -->
-  <div class="sec-lbl">DAR Information</div>
-
-  <div class="card">
-    <div class="g2">
-      <div class="field"><label class="lbl">Ticket No <span class="ai-badge" id="ai-ticket" style="display:none">AI</span></label>
-        <input type="text" id="f-ticket" placeholder="e.g. 31731"></div>
-      <div class="field"><label class="lbl">Contract No <span class="ai-badge" id="ai-contract" style="display:none">AI</span></label>
-        <input type="text" id="f-contract" placeholder="TNB 671/2018"></div>
+<!-- ══════════════ GENERATE SCREEN ══════════════ -->
+<div id="generate-screen" class="screen">
+  <div class="hdr">
+    <div class="hdr-row">
+      <button class="hdr-back" onclick="showHome()">‹</button>
+      <div style="flex:1">
+        <div class="hdr-title">Generate DAR Report</div>
+        <div class="hdr-sub" id="ai-lbl-sub">AI: Checking...</div>
+      </div>
+      <div class="hdr-ai"><div class="ai-dot off" id="ai-dot"></div></div>
     </div>
-    <div class="g2">
-      <div class="field"><label class="lbl">Station <span class="ai-badge" id="ai-station" style="display:none">AI</span></label>
-        <input type="text" id="f-station" placeholder="Kuantan"></div>
-      <div class="field"><label class="lbl">PIC <span class="ai-badge" id="ai-pic" style="display:none">AI</span></label>
-        <input type="text" id="f-pic" placeholder="Nama PIC"></div>
-    </div>
-    <div class="g2">
-      <div class="field"><label class="lbl">Site Visit Date <span class="ai-badge" id="ai-sitedate" style="display:none">AI</span></label>
-        <input type="date" id="f-date"></div>
-      <div class="field"><label class="lbl">DO No</label>
-        <input type="text" id="f-dono" placeholder="03/06-0003"></div>
-    </div>
-    <div class="g2">
-      <div class="field"><label class="lbl">Total Qty <span class="ai-badge" id="ai-totalqty" style="display:none">AI</span></label>
-        <input type="text" id="f-totalqty" placeholder="159 Nos"></div>
-      <div class="field"><label class="lbl">Defective Qty</label>
-        <input type="text" id="f-defqty" placeholder="4 Nos"></div>
-    </div>
-    <div class="field"><label class="lbl">Def. Product Model <span class="ai-badge" id="ai-defmodel" style="display:none">AI</span></label>
-      <input type="text" id="f-defmodel" placeholder="RL151028B"></div>
-    <div class="field"><label class="lbl">New Product Model</label>
-      <input type="text" id="f-newmodel" placeholder="Athena RL151026"></div>
-    <div class="g2">
-      <div class="field"><label class="lbl">Delivery Date <span class="ai-badge" id="ai-deliverydate" style="display:none">AI</span></label>
-        <input type="text" id="f-deliverydate" placeholder="08-2023"></div>
-      <div class="field"><label class="lbl">Delivery Location</label>
-        <input type="text" id="f-delivery" placeholder="KKB Store"></div>
-    </div>
-    <div class="field">
-      <label class="lbl" style="color:var(--accent);font-weight:700;">👷 SNFOR Staff Name</label>
-      <input type="text" id="f-staffname" placeholder="Nama staff yang pergi site" 
-        style="border-color:var(--accent);font-weight:600;">
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-gen-btn" onclick="switchGenTab('generate')">📋 Generate</button>
+      <button class="tab-btn" id="tab-hist-btn" onclick="switchGenTab('genhistory')">📁 My Reports</button>
     </div>
   </div>
 
-  <!-- GENERATE -->
-  <div class="prog" id="prog"><div class="prog-fill" id="pfill"></div></div>
-  <button class="btn-primary" id="gen-btn" onclick="generate()">⬇ Generate DAR Excel</button>
-  <div id="gen-msg" style="margin-top:8px;"></div>
-  <div class="safe-bottom"></div>
+  <!-- Generate Tab -->
+  <div id="gen-tab" class="content">
+    <div id="status-box" class="sbox s-warn" style="margin-bottom:12px;">⚠ Add lanterns and capture photos to begin</div>
+    <div class="tpl-warn" id="tpl-warn">⚠ DAR Template not ready — contact supervisor to setup.</div>
 
-</div><!-- /tab-generate-content -->
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:4px 0 8px;display:flex;align-items:center;gap:6px;">
+      Lantern Photos<span style="flex:1;height:1px;background:var(--border);display:block;"></span>
+    </div>
 
-<!-- HISTORY TAB -->
-<div class="content" id="tab-history-content" style="display:none;">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-    <div style="font-size:15px;font-weight:700;color:var(--text);">📁 DAR History</div>
-    <div id="hist-count" style="font-size:11px;color:var(--muted);"></div>
+    <div id="units-list"></div>
+    <button class="add-unit-btn" onclick="addUnit()"><span style="font-size:20px;">+</span> Add Lantern</button>
+
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:4px 0 8px;display:flex;align-items:center;gap:6px;">
+      DAR Information<span style="flex:1;height:1px;background:var(--border);display:block;"></span>
+    </div>
+
+    <div class="card">
+      <div class="g2">
+        <div class="field"><label class="lbl">Ticket No</label><input type="text" id="f-ticket" placeholder="e.g. 31731"></div>
+        <div class="field"><label class="lbl">Contract No <span class="ai-badge" id="ai-contract" style="display:none">AI</span></label><input type="text" id="f-contract" placeholder="TNB 671/2018"></div>
+      </div>
+      <div class="g2">
+        <div class="field"><label class="lbl">Station</label><input type="text" id="f-station" placeholder="Kuantan"></div>
+        <div class="field"><label class="lbl">PIC</label><input type="text" id="f-pic" placeholder="PIC Name"></div>
+      </div>
+      <div class="g2">
+        <div class="field"><label class="lbl">Site Visit Date</label><input type="date" id="f-date"></div>
+        <div class="field"><label class="lbl">DO No</label><input type="text" id="f-dono" placeholder="03/06-0003"></div>
+      </div>
+      <div class="g2">
+        <div class="field"><label class="lbl">Total Qty</label><input type="text" id="f-totalqty" placeholder="159 Nos"></div>
+        <div class="field"><label class="lbl">Defective Qty</label><input type="text" id="f-defqty" placeholder="4 Nos"></div>
+      </div>
+      <div class="field"><label class="lbl">Def. Product Model <span class="ai-badge" id="ai-defmodel" style="display:none">AI</span></label><input type="text" id="f-defmodel" placeholder="RL151028B"></div>
+      <div class="field"><label class="lbl">New Product Model</label><input type="text" id="f-newmodel" placeholder="Athena RL151026"></div>
+      <div class="g2">
+        <div class="field"><label class="lbl">Delivery Date <span class="ai-badge" id="ai-deliverydate" style="display:none">AI</span></label><input type="text" id="f-deliverydate" placeholder="08-2023"></div>
+        <div class="field"><label class="lbl">Delivery Location</label><input type="text" id="f-delivery" placeholder="KKB Store"></div>
+      </div>
+      <div class="field">
+        <label class="lbl" style="color:var(--navy);font-weight:800;">👷 SNFOR Staff Name</label>
+        <input type="text" id="f-staffname" placeholder="Staff name on site" style="border-color:var(--accent);font-weight:600;">
+      </div>
+    </div>
+
+    <div class="prog" id="prog"><div class="prog-fill" id="pfill"></div></div>
+    <button class="btn-primary" id="gen-btn" onclick="generate()">⬇ Generate DAR Excel</button>
+    <div id="gen-msg" style="margin-top:8px;"></div>
+    <div class="safe-bottom"></div>
   </div>
-  <div id="history-list">
-    <div class="sbox s-warn">Tiada rekod lagi. Generate DAR dulu!</div>
+
+  <!-- My Reports Tab -->
+  <div id="genhistory-tab" class="content" style="display:none;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div style="font-size:15px;font-weight:800;color:var(--navy);">📁 My Generated Reports</div>
+      <div id="hist-count" style="font-size:11px;color:var(--muted);"></div>
+    </div>
+    <div id="history-list"><div class="sbox s-warn">No reports yet. Generate a DAR first!</div></div>
+    <div class="safe-bottom"></div>
   </div>
-  <div class="safe-bottom"></div>
+</div>
+
+<!-- ══════════════ TICKET DETAIL MODAL ══════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div class="modal-ticket" id="m-ticket"></div>
+          <div class="modal-location" id="m-location"></div>
+        </div>
+        <div id="m-status-badge"></div>
+      </div>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
 </div>
 
 <script>
+// ── TICKET DATA ──
+const STATIC_TICKETS = [{"ticket": "36353", "location": "Pasir Mas", "contract": "TNB 2047/2023", "model": "RL151028B", "reported": "22/06/2024", "site_visit": "01/10/2024", "serial": "A-210823-02719", "defects": ["LED Driver"], "reason": "Experience Surge At Site", "status": "Docs Submitted In SMB", "closed_date": "", "do_no": "2215", "new_serial": "A-150925-00008"}, {"ticket": "36646", "location": "Bayan Baru", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "16/07/2024", "site_visit": "13/08/2025", "serial": "A-150423-03220", "defects": ["LED Driver"], "reason": "Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "28/01/2026", "do_no": "2210", "new_serial": "A-150925-00001"}, {"ticket": "36963", "location": "Pasir Mas", "contract": "TNB 2047/2023", "model": "RL151028B", "reported": "16/08/2024", "site_visit": "29/08/2025", "serial": "A-210823-00764", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "28/01/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "37636", "location": "Pasir Mas", "contract": "TNB 2047/2023", "model": "RL151028B", "reported": "09/10/2024", "site_visit": "29/08/2025", "serial": "A-210823-00692", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "38599", "location": "Kemaman", "contract": "TNB 2047/2023", "model": "RL151028B", "reported": "17/12/2024", "site_visit": "26/08/2025", "serial": "A-210823-03495", "defects": ["LED Driver"], "reason": "Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "2216", "new_serial": "A-150925-00008"}, {"ticket": "38738", "location": "Pasir Mas", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "26/12/2024", "site_visit": "29/08/2025", "serial": "A-150423-02881", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "38811", "location": "Seberang Jaya", "contract": "TNB 2047/2023", "model": "RL151028B", "reported": "01/01/2025", "site_visit": "13/08/2025", "serial": "A-210823-00126", "defects": ["LED Driver"], "reason": "Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "2211", "new_serial": "A-150925-00002"}, {"ticket": "38886", "location": "Bahau", "contract": "TNB 2047/2023", "model": "RL151028B", "reported": "08/01/2025", "site_visit": "07/02/2025", "serial": "A-210823-04078", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "10/06/2025", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "38923", "location": "Rompin", "contract": "TNB 671/2018", "model": "RL151026", "reported": "11/01/2025", "site_visit": "25/08/2025", "serial": "A-151223-00293", "defects": ["LED Driver"], "reason": "Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "2197", "new_serial": "I-260525-01106"}, {"ticket": "38969", "location": "Kuala Lumpur", "contract": "TNB 671/2018", "model": "RL151026", "reported": "13/01/2025", "site_visit": "13/02/2025", "serial": "C-150524-01173", "defects": ["LED Driver"], "reason": "Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "29/08/2025", "do_no": "1878", "new_serial": "F-231224-00049"}, {"ticket": "38969", "location": "Kuala Lumpur", "contract": "TNB 671/2018", "model": "RL151026", "reported": "13/01/2025", "site_visit": "13/02/2025", "serial": "C-150524-00450", "defects": ["SPD"], "reason": "Suspected Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "29/08/2025", "do_no": "1878", "new_serial": "F-231224-00050"}, {"ticket": "38998", "location": "Melaka Barat", "contract": "TNB 671/2018", "model": "RL151026", "reported": "14/01/2025", "site_visit": "24/02/2025", "serial": "C-150524-01419", "defects": ["LED Driver"], "reason": "Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "29/08/2025", "do_no": "1890", "new_serial": "F-231224-00649"}, {"ticket": "39272", "location": "Temerloh", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "27/01/2025", "site_visit": "1/27/25", "serial": "A-150423-00399", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "22/08/2025", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "39280", "location": "Pulau Pinang", "contract": "TNB 671/2018", "model": "RL151026", "reported": "27/01/2025", "site_visit": "13/08/2025", "serial": "B-250324-01795", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "29/08/2025", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "40373", "location": "Ipoh", "contract": "TNB 671/2018", "model": "RL151026", "reported": "16/04/2025", "site_visit": "16/12/2025", "serial": "C-150524-02683", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "40713", "location": "Besut", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "02/05/2025", "site_visit": "29/08/2025", "serial": "A-150925-01736", "defects": ["LED Driver"], "reason": "Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "2192", "new_serial": "A-150925-00021"}, {"ticket": "40838", "location": "Muar", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "07/05/2025", "site_visit": "16/07/2025", "serial": "A-150423-00274", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "16/07/2025", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "40838", "location": "Muar", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "07/05/2025", "site_visit": "16/07/2025", "serial": "A-150423-01629", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "16/07/2025", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "41400", "location": "Besut", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "17/06/2025", "site_visit": "29/08/2025", "serial": "A-150423-02780", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "41422", "location": "Kuala Berang", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "19/06/2025", "site_visit": "28/08/2025", "serial": "A-150423-01819", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "41608", "location": "Alor Setar", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "02/07/2025", "site_visit": "02/07/2025", "serial": "A-150423-03024", "defects": ["SPD"], "reason": "Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "2195", "new_serial": "A-150925-00005"}, {"ticket": "41726", "location": "Taiping", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "11/07/2025", "site_visit": "13/08/2025", "serial": "A-150423-02104", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/08/2025", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "41733", "location": "Taiping", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "11/07/2025", "site_visit": "13/08/2025", "serial": "A-150423-00917", "defects": ["LED Driver"], "reason": "Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "2209", "new_serial": "A-150925-00003"}, {"ticket": "41736", "location": "Taiping", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "11/07/2025", "site_visit": "13/08/2025", "serial": "A-150423-01490", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "25/08/2025", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "41736", "location": "Taiping", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "11/07/2025", "site_visit": "13/08/2025", "serial": "A-150423-01493", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "25/08/2025", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "41736", "location": "Taiping", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "11/07/2025", "site_visit": "13/08/2025", "serial": "A-150423-02013", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "25/08/2025", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "41981", "location": "Ipoh", "contract": "TNB 671/2018", "model": "RL151026", "reported": "28/07/2025", "site_visit": "18/08/2025", "serial": "C-150524-02425", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "25/08/2025", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "42073", "location": "Gerik", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "29/07/2025", "site_visit": "04/11/2025", "serial": "A-150423-00251", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "42073", "location": "Gerik", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "29/07/2025", "site_visit": "04/11/2025", "serial": "A-150423-03084", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "42073", "location": "Gerik", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "29/07/2025", "site_visit": "04/11/2025", "serial": "A-150423-03597", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "42073", "location": "Gerik", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "29/07/2025", "site_visit": "04/11/2025", "serial": "A-150423-00242", "defects": ["LED Module"], "reason": "Miss-Handling At Site", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "2197", "new_serial": "A-150925-00018"}, {"ticket": "42102", "location": "Kuala Berang", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "31/07/2025", "site_visit": "28/08/2025", "serial": "A-150423-01820", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "42390", "location": "Kuala Terengganu", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "24/08/2025", "site_visit": "28/08/2025", "serial": "A-150423-02548", "defects": ["LED Driver"], "reason": "Suspected Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "2194", "new_serial": "A-150925-00023"}, {"ticket": "42394", "location": "Kuala Terengganu", "contract": "TNB 671/2018", "model": "RL151026", "reported": "24/08/2025", "site_visit": "28/08/2025", "serial": "F-231224-00243", "defects": ["SPD"], "reason": "Suspected Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "2193", "new_serial": "I-260525-01596"}, {"ticket": "42399", "location": "Kuala Terengganu", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "24/08/2025", "site_visit": "28/08/2025", "serial": "A-150423-03287", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "42441", "location": "Kuala Terengganu", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "25/08/2025", "site_visit": "28/08/2025", "serial": "A-150423-03105", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "42441", "location": "Kuala Terengganu", "contract": "TNB 671/2018", "model": "RL151026", "reported": "25/08/2025", "site_visit": "28/08/2025", "serial": "F-231224-00125", "defects": ["LED Driver"], "reason": "Suspected Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "2206", "new_serial": "I-260525-01602"}, {"ticket": "42455", "location": "Kuala Terengganu", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "25/08/2025", "site_visit": "28/08/2025", "serial": "A-150423-03108", "defects": ["LED Driver"], "reason": "Suspected Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "2207", "new_serial": "A-150925-00022"}, {"ticket": "42639", "location": "AMBS", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "09/09/2025", "site_visit": "09/01/2026", "serial": "A-150423-01732", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "42695", "location": "Klang", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "15/09/2025", "site_visit": "12/12/2025", "serial": "A-150423-01979", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "42695", "location": "Klang", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "15/09/2025", "site_visit": "12/12/2025", "serial": "A-150423-03551", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "42935", "location": "Besut", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "02/10/2025", "site_visit": "09/01/2026", "serial": "A-150423-03719", "defects": ["LED Driver"], "reason": "Suspected Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "27/02/2026", "do_no": "2220", "new_serial": "A-150925-00007"}, {"ticket": "42935", "location": "Besut", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "02/10/2025", "site_visit": "09/01/2026", "serial": "A-150423-03673", "defects": ["LED Driver"], "reason": "Suspected Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "27/02/2026", "do_no": "2220", "new_serial": "A-150925-00009"}, {"ticket": "43037", "location": "Marang", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "09/10/2025", "site_visit": "09/01/2026", "serial": "A-150423-03287", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "27/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "43037", "location": "Marang", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "09/10/2025", "site_visit": "09/01/2026", "serial": "A-150423-03741", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "27/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "43039", "location": "Marang", "contract": "TNB 671/2018", "model": "RL151026", "reported": "09/10/2025", "site_visit": "09/01/2026", "serial": "A-151223-01325", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "27/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "43354", "location": "Pasir Mas", "contract": "TNB 2047/2023", "model": "RL151028B", "reported": "03/11/2025", "site_visit": "25/03/2026", "serial": "A-210823-03722", "defects": ["LED Driver"], "reason": "N/A", "status": "Ticket In Progress", "closed_date": "", "do_no": "0326-0006", "new_serial": "A-150925-00020"}, {"ticket": "43414", "location": "Muar", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "05/11/2025", "site_visit": "15/12/2025", "serial": "A-150423-00289", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "27/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "43414", "location": "Muar", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "05/11/2025", "site_visit": "15/12/2025", "serial": "A-150423-00324", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "27/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "43460", "location": "Kuala Lumpur", "contract": "TNB 671/2018", "model": "RL151026", "reported": "11/11/2025", "site_visit": "28/08/2025", "serial": "H-170325-03957", "defects": ["LED Driver"], "reason": "Suspected Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "27/02/2026", "do_no": "2213", "new_serial": "I-260525-02112"}, {"ticket": "43460", "location": "Kuala Lumpur", "contract": "TNB 671/2018", "model": "RL151026", "reported": "11/11/2025", "site_visit": "28/08/2025", "serial": "H-170325-03788", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "27/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "43460", "location": "Kuala Lumpur", "contract": "TNB 671/2018", "model": "RL151026", "reported": "11/11/2025", "site_visit": "28/08/2025", "serial": "H-170325-00740", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "27/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "43559", "location": "Kota Tinggi", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "16/11/2025", "site_visit": "09/01/2026", "serial": "A-150423-01063", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "27/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "43559", "location": "Kota Tinggi", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "16/11/2025", "site_visit": "09/01/2026", "serial": "A-150423-01060", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "27/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "43636", "location": "Kuala Berang", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "21/11/2025", "site_visit": "09/01/2026", "serial": "A-150423-01817", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "27/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "43715", "location": "Pulau Pinang", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "26/11/2025", "site_visit": "29/01/2026", "serial": "A-150423-03465", "defects": [], "reason": "N/A", "status": "Docs Submitted In SMB", "closed_date": "", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "43777", "location": "Melaka Barat", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "03/12/2025", "site_visit": "15/12/2025", "serial": "A-150423-03350", "defects": ["LED Driver"], "reason": "Suspected Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "16/03/2026", "do_no": "2208", "new_serial": "A-150925-00006"}, {"ticket": "43813", "location": "Pasir Mas", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "05/12/2025", "site_visit": "09/01/2026", "serial": "A-150423-02700", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "27/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "43825", "location": "Alor Setar", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "05/12/2025", "site_visit": "29/01/2026", "serial": "A-150423-02754", "defects": [], "reason": "N/A", "status": "Docs Submitted In SMB", "closed_date": "", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "43854", "location": "Besut", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "08/12/2025", "site_visit": "09/01/2026", "serial": "A-150423-01730", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "27/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "43854", "location": "Besut", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "08/12/2025", "site_visit": "09/01/2026", "serial": "A-150423-01736", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "27/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "43886", "location": "Kuala Terengganu", "contract": "TNB 671/2018", "model": "RL151026", "reported": "12/12/2025", "site_visit": "09/01/2026", "serial": "B-250324-03885", "defects": ["LED Driver"], "reason": "Suspected Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "16/03/2026", "do_no": "2249", "new_serial": "J-151025-03347"}, {"ticket": "43886", "location": "Kuala Terengganu", "contract": "TNB 671/2018", "model": "RL151026", "reported": "12/12/2025", "site_visit": "09/01/2026", "serial": "B-250324-02036", "defects": ["LED Driver"], "reason": "Suspected Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "16/03/2026", "do_no": "2249", "new_serial": "J-151025-02903"}, {"ticket": "43893", "location": "Kuala Terengganu", "contract": "TNB 671/2018", "model": "RL151026", "reported": "12/12/2025", "site_visit": "09/01/2026", "serial": "A-151223-01228", "defects": ["LED Driver"], "reason": "Suspected Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "16/03/2026", "do_no": "2250", "new_serial": "J-151025-2106"}, {"ticket": "43902", "location": "Kuala Terengganu", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "12/12/2025", "site_visit": "09/01/2026", "serial": "A-151223-02488", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "27/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "44142", "location": "Kuala Berang", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "04/01/2026", "site_visit": "09/01/2026", "serial": "A-150423-01820", "defects": ["LED Driver"], "reason": "Suspected Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "16/03/2026", "do_no": "2219", "new_serial": "A-150925-00013"}, {"ticket": "44142", "location": "Kuala Berang", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "04/01/2026", "site_visit": "09/01/2026", "serial": "A-150423-01819", "defects": ["LED Driver"], "reason": "Suspected Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "16/03/2026", "do_no": "2219", "new_serial": "A-150925-00017"}, {"ticket": "44211", "location": "Besut", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "05/01/2026", "site_visit": "09/01/2026", "serial": "A-150423-01739", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "44211", "location": "Besut", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "05/01/2026", "site_visit": "09/01/2026", "serial": "A-150423-01745", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "44211", "location": "Besut", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "05/01/2026", "site_visit": "09/01/2026", "serial": "A-150423-01750", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "44211", "location": "Besut", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "05/01/2026", "site_visit": "09/01/2026", "serial": "A-150423-02484", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "44211", "location": "Besut", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "05/01/2026", "site_visit": "09/01/2026", "serial": "A-150423-02486", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "44211", "location": "Besut", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "05/01/2026", "site_visit": "09/01/2026", "serial": "A-150423-02780", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "26/02/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "44282", "location": "Marang", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "06/01/2026", "site_visit": "09/01/2026", "serial": "A-150423-02382", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "12/03/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "44282", "location": "Marang", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "06/01/2026", "site_visit": "09/01/2026", "serial": "A-150423-02467", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "12/03/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "44282", "location": "Marang", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "06/01/2026", "site_visit": "09/01/2026", "serial": "A-150423-03161", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "12/03/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "44282", "location": "Marang", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "06/01/2026", "site_visit": "09/01/2026", "serial": "A-150423-03324", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "12/03/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "44282", "location": "Marang", "contract": "TNB 671/2018", "model": "RL151026", "reported": "06/01/2026", "site_visit": "09/01/2026", "serial": "A-151223-01961", "defects": ["SPD"], "reason": "Suspected Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "12/03/2026", "do_no": "2248", "new_serial": "J-151025-03372"}, {"ticket": "44282", "location": "Marang", "contract": "TNB 671/2018", "model": "RL151026", "reported": "06/01/2026", "site_visit": "09/01/2026", "serial": "F-231224-00008", "defects": ["LED Driver"], "reason": "Suspected Experience Surge At Site", "status": "Closed - Admin Approved", "closed_date": "12/03/2026", "do_no": "2248", "new_serial": "J-151025-02920"}, {"ticket": "44282", "location": "Marang", "contract": "TNB 671/2018", "model": "RL151026", "reported": "06/01/2026", "site_visit": "09/01/2026", "serial": "F-231224-00269", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "12/03/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "44282", "location": "Marang", "contract": "TNB 671/2018", "model": "RL151026", "reported": "06/01/2026", "site_visit": "09/01/2026", "serial": "F-231224-00501", "defects": [], "reason": "N/A", "status": "Closed - Admin Approved", "closed_date": "12/03/2026", "do_no": "N/A", "new_serial": "Non Faulty  (no replacement)"}, {"ticket": "44806", "location": "Kuantan", "contract": "TNB 671/2018", "model": "RL151026", "reported": "14/02/2026", "site_visit": "09/03/2026", "serial": "A-151223-01902", "defects": [], "reason": "Suspected Experience Surge At Site", "status": "Docs Submitted In SMB", "closed_date": "", "do_no": "03/26-0002", "new_serial": "J-151025-00159"}, {"ticket": "44984", "location": "Muar", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "27/02/2026", "site_visit": "30/03/2026", "serial": "", "defects": [], "reason": "N/A", "status": "In Progress", "closed_date": "", "do_no": "", "new_serial": ""}, {"ticket": "44984", "location": "Muar", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "27/02/2026", "site_visit": "30/03/2026", "serial": "", "defects": [], "reason": "N/A", "status": "In Progress", "closed_date": "", "do_no": "", "new_serial": ""}, {"ticket": "44984", "location": "Muar", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "27/02/2026", "site_visit": "30/03/2026", "serial": "", "defects": [], "reason": "N/A", "status": "In Progress", "closed_date": "", "do_no": "", "new_serial": ""}, {"ticket": "44984", "location": "Muar", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "27/02/2026", "site_visit": "30/03/2026", "serial": "", "defects": [], "reason": "N/A", "status": "In Progress", "closed_date": "", "do_no": "", "new_serial": ""}, {"ticket": "44984", "location": "Muar", "contract": "TNB 1211/2023", "model": "RL151028B", "reported": "27/02/2026", "site_visit": "30/03/2026", "serial": "", "defects": [], "reason": "N/A", "status": "In Progress", "closed_date": "", "do_no": "", "new_serial": ""}, {"ticket": "TNB Conract", "location": "Total Supply Qty", "contract": "Defective Component", "model": "", "reported": "", "site_visit": "", "serial": "Total Reported", "defects": [], "reason": "N/A", "status": "In Progress", "closed_date": "", "do_no": "", "new_serial": ""}, {"ticket": "TNB 671/2018", "location": "30170", "contract": "", "model": "", "reported": "9", "site_visit": "", "serial": "21", "defects": [], "reason": "N/A", "status": "In Progress", "closed_date": "", "do_no": "", "new_serial": ""}, {"ticket": "TNB 2047/2023", "location": "5000", "contract": "", "model": "", "reported": "4", "site_visit": "", "serial": "7", "defects": [], "reason": "N/A", "status": "In Progress", "closed_date": "", "do_no": "", "new_serial": ""}, {"ticket": "TNB 1211/2023", "location": "3775", "contract": "", "model": "1", "reported": "10", "site_visit": "", "serial": "59", "defects": [], "reason": "N/A", "status": "In Progress", "closed_date": "", "do_no": "", "new_serial": ""}, {"ticket": "TNB 638/2025", "location": "2880", "contract": "", "model": "", "reported": "", "site_visit": "", "serial": "", "defects": [], "reason": "N/A", "status": "In Progress", "closed_date": "", "do_no": "", "new_serial": ""}];
+
+let allTickets = [...STATIC_TICKETS];
+let currentFilter = 'all';
+
+// ── AI STATUS ──
+fetch('/ai_status').then(r=>r.json()).then(d=>{
+  const dot=document.getElementById('ai-dot');
+  const sub=document.getElementById('ai-lbl-sub');
+  if(d.active){dot.classList.remove('off');sub.textContent='AI: '+d.name+' — Ready';}
+  else sub.textContent='No AI Key configured';
+}).catch(()=>{});
+
+fetch('/template_status').then(r=>r.json()).then(d=>{
+  if(!d.saved) document.getElementById('tpl-warn').style.display='block';
+}).catch(()=>{});
+
+// ── HOME ──
+function initHome(){
+  const total = allTickets.length;
+  const badge = document.getElementById('total-badge');
+  if(badge) badge.textContent = total+' Records';
+}
+initHome();
+
+function showScreen(id){
+  document.getElementById('home-screen').style.display='none';
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='history-screen') renderTickets();
+}
+
+function showHome(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('home-screen').style.display='flex';
+}
+
+// ── TICKET HISTORY ──
+function statusClass(s){
+  if(!s) return 's-progress';
+  const sl = s.toLowerCase();
+  if(sl.includes('closed')) return 's-closed';
+  if(sl.includes('docs')) return 's-docs';
+  return 's-progress';
+}
+function statusLabel(s){
+  if(!s) return 'In Progress';
+  if(s.toLowerCase().includes('closed')) return '✅ Closed';
+  if(s.toLowerCase().includes('docs')) return '📄 Docs Submitted';
+  return '🔄 In Progress';
+}
+
+function renderTickets(){
+  const query = (document.getElementById('search-input')?.value||'').toLowerCase();
+  let filtered = allTickets.filter(t=>{
+    if(currentFilter==='closed' && !t.status.toLowerCase().includes('closed')) return false;
+    if(currentFilter==='progress' && (t.status.toLowerCase().includes('closed')||t.status.toLowerCase().includes('docs'))) return false;
+    if(currentFilter==='docs' && !t.status.toLowerCase().includes('docs')) return false;
+    if(query){
+      const hay = (t.ticket+t.location+t.contract+t.serial+t.model).toLowerCase();
+      if(!hay.includes(query)) return false;
+    }
+    return true;
+  });
+
+  // Stats (always from full data)
+  document.getElementById('stat-total').textContent = allTickets.length;
+  document.getElementById('stat-closed').textContent = allTickets.filter(t=>t.status.toLowerCase().includes('closed')).length;
+  document.getElementById('stat-progress').textContent = allTickets.filter(t=>!t.status.toLowerCase().includes('closed')&&!t.status.toLowerCase().includes('docs')).length;
+  document.getElementById('stat-docs').textContent = allTickets.filter(t=>t.status.toLowerCase().includes('docs')).length;
+  document.getElementById('rec-count').textContent = allTickets.length+' records';
+  document.getElementById('list-count').textContent = filtered.length+' results';
+
+  const list = document.getElementById('ticket-list');
+  if(filtered.length===0){
+    list.innerHTML='<div class="sbox s-warn">No tickets found matching your search.</div>'; return;
+  }
+
+  list.innerHTML = filtered.map((t,i)=>`
+    <div class="ticket-card" onclick="openTicket(${allTickets.indexOf(t)})">
+      <div class="tc-header">
+        <div class="tc-left">
+          <div class="tc-ticket">#${t.ticket}</div>
+          <div class="tc-location">📍 ${t.location}</div>
+          <div class="tc-contract">${t.contract} &nbsp;·&nbsp; ${t.model}</div>
+        </div>
+        <div class="tc-right">
+          <span class="status-badge ${statusClass(t.status)}">${statusLabel(t.status)}</span>
+          <span class="tc-date">Reported: ${t.reported}</span>
+        </div>
+      </div>
+      ${t.defects.length>0||t.reason!=='N/A'?`
+      <div class="tc-body">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Defective Components</div>
+        <div class="tc-detail-row">
+          ${t.defects.length>0?t.defects.map(d=>`<span class="defect-tag">⚡ ${d}</span>`).join(''):'<span style="font-size:11px;color:var(--muted);">No defect detected</span>'}
+        </div>
+        ${t.reason&&t.reason!=='N/A'?`<div style="font-size:11px;color:var(--muted);margin-top:6px;">📝 ${t.reason}</div>`:''}
+      </div>`:''}
+    </div>
+  `).join('');
+}
+
+function setFilter(f, btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const labels={all:'All Records',closed:'Closed Tickets',progress:'In Progress',docs:'Docs Submitted'};
+  document.getElementById('list-label').textContent=labels[f];
+  renderTickets();
+}
+
+function filterTickets(){ renderTickets(); }
+
+function openTicket(idx){
+  const t = allTickets[idx];
+  document.getElementById('m-ticket').textContent = 'Ticket #'+t.ticket;
+  document.getElementById('m-location').textContent = '📍 '+t.location;
+  document.getElementById('m-status-badge').innerHTML = `<span class="status-badge ${statusClass(t.status)}">${statusLabel(t.status)}</span>`;
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="detail-section">
+      <div class="detail-section-title">Contract Details</div>
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-lbl">Contract No</div><div class="detail-val">${t.contract}</div></div>
+        <div class="detail-item"><div class="detail-lbl">Lantern Model</div><div class="detail-val">${t.model}</div></div>
+        <div class="detail-item"><div class="detail-lbl">Reported Date</div><div class="detail-val">${t.reported}</div></div>
+        <div class="detail-item"><div class="detail-lbl">Site Visit Date</div><div class="detail-val">${t.site_visit||'—'}</div></div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Lantern Serial</div>
+      <div class="detail-grid">
+        <div class="detail-item full"><div class="detail-lbl">Defective Serial No</div><div class="detail-val mono">${t.serial||'—'}</div></div>
+        <div class="detail-item full"><div class="detail-lbl">Replacement Serial No</div><div class="detail-val mono">${t.new_serial||'—'}</div></div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Defect Analysis</div>
+      <div class="detail-item full" style="margin-bottom:8px;">
+        <div class="detail-lbl">Defective Components</div>
+        <div class="defect-list">
+          ${t.defects.length>0?t.defects.map(d=>`<span class="defect-tag">⚡ ${d}</span>`).join(''):'<span style="font-size:12px;color:var(--muted);">No defect detected (Non-Faulty)</span>'}
+        </div>
+      </div>
+      <div class="detail-item full">
+        <div class="detail-lbl">Root Cause / Reason</div>
+        <div class="detail-val" style="font-size:12px;line-height:1.5;">${t.reason||'N/A'}</div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Submission Details</div>
+      <div class="detail-grid">
+        <div class="detail-item"><div class="detail-lbl">DO No</div><div class="detail-val mono">${t.do_no||'—'}</div></div>
+        <div class="detail-item"><div class="detail-lbl">Closed Date</div><div class="detail-val">${t.closed_date||'—'}</div></div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(e){
+  if(e.target===document.getElementById('modal-overlay'))
+    document.getElementById('modal-overlay').classList.remove('open');
+}
+
+// Upload new Excel data
+async function uploadTicketData(input){
+  const file = input.files[0]; if(!file) return;
+  const fd = new FormData();
+  fd.append('file', file);
+  const done = document.getElementById('upload-done');
+  done.style.display='block';
+  done.textContent='⏳ Processing...';
+  try{
+    const r = await fetch('/upload_tracking', {method:'POST', body:fd});
+    const d = await r.json();
+    if(d.ok){
+      allTickets = d.tickets;
+      done.textContent = `✓ Loaded ${d.tickets.length} records`;
+      document.getElementById('total-badge').textContent = d.tickets.length+' Records';
+      renderTickets();
+    } else {
+      done.textContent = '✗ Error: '+d.error;
+    }
+  } catch(e){
+    done.textContent = '✗ '+e.message;
+  }
+}
+
+// ── GENERATE TAB ──
+function switchGenTab(tab){
+  const isGen = tab==='generate';
+  document.getElementById('gen-tab').style.display = isGen?'block':'none';
+  document.getElementById('genhistory-tab').style.display = isGen?'none':'block';
+  document.getElementById('tab-gen-btn').classList.toggle('active', isGen);
+  document.getElementById('tab-hist-btn').classList.toggle('active', !isGen);
+  if(!isGen) loadHistory();
+}
+
 const CAUSES=['LED Driver','LED Module','SPD','Natural Disaster','N/A'];
 const ACTIONS=['Lantern Replacement','Return Back TNB','Void'];
 const RCAS=['Good','Water Ingression','Natural Disaster','Broken','Lantern Damage','Body Crack','Component','Warranty Expired','N/A'];
 
-let ST={tpl:false,units:0};
-let units=[];      // {id, files:{full,serial,issue}, extracted:{}, cause, action, rca, processing}
-let newSerials=[];
+let units=[];
 let unitIdCounter=0;
-
-// AI status
-fetch('/ai_status').then(r=>r.json()).then(d=>{
-  const dot=document.getElementById('ai-dot'),lbl=document.getElementById('ai-lbl');
-  if(d.active){dot.classList.remove('off');lbl.textContent='AI: '+d.name;}
-  else lbl.textContent='No AI Key';
-}).catch(()=>{});
-
-// Template status check
-fetch('/template_status').then(r=>r.json()).then(d=>{
-  ST.tpl=d.saved;
-  if(!d.saved){
-    document.getElementById('tpl-status-box').style.display='block';
-  }
-  updateStatus();
-}).catch(()=>{});
-
-function fillField(id,val){
-  if(!val) return false;
-  const el=document.getElementById(id); if(!el||el.value) return false;
-  el.value=val; el.classList.add('auto-filled');
-  // Show AI badge — strip 'f-' prefix to get badge id
-  const badgeId='ai-'+id.replace(/^f-/,'');
-  const b=document.getElementById(badgeId); if(b) b.style.display='inline';
-  return true;
-}
 
 function updateDefQty(){
   const el=document.getElementById('f-defqty');
   if(el) el.value = units.length > 0 ? units.length+' Nos' : '';
 }
 
+function fillField(id,val){
+  if(!val) return false;
+  const el=document.getElementById(id); if(!el||el.value) return false;
+  el.value=val; el.classList.add('auto-filled');
+  const badgeId='ai-'+id.replace(/^f-/,'');
+  const b=document.getElementById(badgeId); if(b) b.style.display='inline';
+  return true;
+}
+
 function addUnit(){
   const id=++unitIdCounter;
-  units.push({id, files:{}, extracted:{}, cause:'', action:'', rca:'', lamputest:'', processing:false});
-  renderUnits();
-  updateDefQty();
-  // Scroll to new unit
+  units.push({id,files:{},extracted:{},cause:'',action:'',rca:'',lamputest:'',processing:false});
+  renderUnits(); updateDefQty();
   setTimeout(()=>{
     const el=document.getElementById('unit-'+id);
     if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
@@ -1029,31 +1485,25 @@ function addUnit(){
 
 function removeUnit(id){
   units=units.filter(u=>u.id!==id);
-  renderUnits(); updateStatus();
-  updateDefQty();
+  renderUnits(); updateStatus(); updateDefQty();
 }
 
 function renderUnits(){
   const list=document.getElementById('units-list');
-  ST.units=units.length;
   list.innerHTML=units.map(u=>{
-    const hasAll=['full','serial','issue'].every(t=>u.files[t]);
     const sn=u.extracted.serial||`Unit ${u.id}`;
     const contract=u.extracted.contract?`<span class="tag tag-g">📋 ${u.extracted.contract}</span>`:'';
     const date=u.extracted.delivery_date?`<span class="tag tag-g">📅 ${u.extracted.delivery_date}</span>`:'';
-    const qr=u.extracted.qr_code?`<span class="tag tag-g">QR ✓</span>`:'';
     const procMsg=u.processing?`<div class="proc-bar">🤖 AI scanning...</div>`:'';
 
     return `<div class="unit-card" id="unit-${u.id}">
       <div class="unit-header">
         <span class="unit-sn">#${u.id} — ${sn}</span>
-        <button class="del-btn" onclick="removeUnit(${u.id})">✕</button>
+        <button class="del-btn" onclick="removeUnit(${u.id})">✕ Remove</button>
       </div>
-      <div class="unit-status" style="margin-bottom:8px;">${contract}${date}${qr}
-        ${!contract&&!date?'<span class="tag tag-y">Pending AI scan</span>':''}</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;">${contract}${date}${!contract&&!date?'<span class="tag tag-y">Pending AI scan</span>':''}</div>
 
-      <!-- Row 1: Full, Serial, Issue -->
-      <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">📸 Gambar Lantern</div>
+      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">📸 Lantern Photos</div>
       <div class="cam-grid">
         ${['full','serial','issue'].map(type=>{
           const icons={'full':'🏮','serial':'🏷️','issue':'⚠️'};
@@ -1061,73 +1511,55 @@ function renderUnits(){
           const captured=!!u.files[type];
           const thumb=u.thumbs&&u.thumbs[type]?`<img class="cam-thumb" src="${u.thumbs[type]}">`:'';
           const check=captured?`<div class="cam-check">✓</div>`:'';
-          return `<div class="cam-wrapper" style="display:flex;flex-direction:column;gap:4px;">
-            ${thumb?`<div class="cam-btn captured" style="position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;">${thumb}${check}</div>`
-            :`<div class="cam-btn-empty" style="aspect-ratio:1;border-radius:12px;border:2px dashed var(--border);background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;">
-                <div class="cam-icon">${icons[type]}</div>
-                <div class="cam-label">${labels[type]}</div>
+          return `<div style="display:flex;flex-direction:column;gap:4px;">
+            ${thumb?`<div style="position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:2px solid var(--green);">${thumb}${check}</div>`
+            :`<div style="aspect-ratio:1;border-radius:12px;border:2px dashed var(--border);background:var(--light);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;">
+                <div style="font-size:22px;">${icons[type]}</div>
+                <div style="font-size:10px;color:var(--muted);font-weight:600;">${labels[type]}</div>
               </div>`}
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">
-              <label style="background:var(--accent);color:#fff;border-radius:7px;padding:5px 2px;font-size:10px;font-weight:600;text-align:center;cursor:pointer;display:block;">
-                <input type="file" accept="image/*" capture="environment" style="display:none;"
-                  onchange="capturePhoto(${u.id},'${type}',this)">
-                📷 Camera
-              </label>
-              <label style="background:var(--accent-light);color:var(--accent);border:1px solid var(--accent);border-radius:7px;padding:5px 2px;font-size:10px;font-weight:600;text-align:center;cursor:pointer;display:block;">
-                <input type="file" accept="image/*" style="display:none;"
-                  onchange="capturePhoto(${u.id},'${type}',this)">
-                🖼️ Gallery
-              </label>
+              <label style="background:var(--accent);color:#fff;border-radius:7px;padding:5px 2px;font-size:10px;font-weight:700;text-align:center;cursor:pointer;display:block;">
+                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="capturePhoto(${u.id},'${type}',this)">📷</label>
+              <label style="background:var(--blue-bg);color:var(--accent);border:1px solid var(--accent);border-radius:7px;padding:5px 2px;font-size:10px;font-weight:700;text-align:center;cursor:pointer;display:block;">
+                <input type="file" accept="image/*" style="display:none;" onchange="capturePhoto(${u.id},'${type}',this)">🖼️</label>
             </div>
           </div>`;
         }).join('')}
       </div>
 
-      <!-- Row 2: Lampu Test, SPD, Driver -->
-      <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:10px 0 4px;">🔧 Gambar Komponen</div>
+      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:10px 0 4px;">🔧 Component Photos</div>
       <div class="cam-grid">
         ${['lampu_test','spd','driver'].map(type=>{
           const icons={'lampu_test':'💡','spd':'⚡','driver':'🔌'};
-          const labels={'lampu_test':'Lampu Test','spd':'SPD','driver':'Driver'};
+          const labels={'lampu_test':'Lamp Test','spd':'SPD','driver':'Driver'};
           const captured=!!u.files[type];
           const thumb=u.thumbs&&u.thumbs[type]?`<img class="cam-thumb" src="${u.thumbs[type]}">`:'';
           const check=captured?`<div class="cam-check">✓</div>`:'';
-          return `<div class="cam-wrapper" style="display:flex;flex-direction:column;gap:4px;">
-            ${thumb?`<div class="cam-btn captured" style="position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;">${thumb}${check}</div>`
-            :`<div class="cam-btn-empty" style="aspect-ratio:1;border-radius:12px;border:2px dashed var(--border);background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;">
-                <div class="cam-icon">${icons[type]}</div>
-                <div class="cam-label">${labels[type]}</div>
+          return `<div style="display:flex;flex-direction:column;gap:4px;">
+            ${thumb?`<div style="position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;border:2px solid var(--green);">${thumb}${check}</div>`
+            :`<div style="aspect-ratio:1;border-radius:12px;border:2px dashed var(--border);background:var(--light);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;">
+                <div style="font-size:22px;">${icons[type]}</div>
+                <div style="font-size:10px;color:var(--muted);font-weight:600;">${labels[type]}</div>
               </div>`}
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">
-              <label style="background:var(--accent);color:#fff;border-radius:7px;padding:5px 2px;font-size:10px;font-weight:600;text-align:center;cursor:pointer;display:block;">
-                <input type="file" accept="image/*" capture="environment" style="display:none;"
-                  onchange="capturePhoto(${u.id},'${type}',this)">
-                📷 Camera
-              </label>
-              <label style="background:var(--accent-light);color:var(--accent);border:1px solid var(--accent);border-radius:7px;padding:5px 2px;font-size:10px;font-weight:600;text-align:center;cursor:pointer;display:block;">
-                <input type="file" accept="image/*" style="display:none;"
-                  onchange="capturePhoto(${u.id},'${type}',this)">
-                🖼️ Gallery
-              </label>
+              <label style="background:var(--accent);color:#fff;border-radius:7px;padding:5px 2px;font-size:10px;font-weight:700;text-align:center;cursor:pointer;display:block;">
+                <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="capturePhoto(${u.id},'${type}',this)">📷</label>
+              <label style="background:var(--blue-bg);color:var(--accent);border:1px solid var(--accent);border-radius:7px;padding:5px 2px;font-size:10px;font-weight:700;text-align:center;cursor:pointer;display:block;">
+                <input type="file" accept="image/*" style="display:none;" onchange="capturePhoto(${u.id},'${type}',this)">🖼️</label>
             </div>
           </div>`;
         }).join('')}
       </div>
 
-      <!-- Lampu Test Result dropdown -->
       <div class="field" style="margin:6px 0 10px;">
-        <label class="lbl" style="font-size:9px;">💡 Hasil Lampu Test</label>
-        <select onchange="units.find(u=>u.id==${u.id}).lamputest=this.value"
-          style="border-color:${u.lamputest==='Lampu menyala selepas diuji'?'var(--green)':u.lamputest==='Lampu tidak menyala'?'var(--red)':'var(--border)'};">
-          <option value="">— Pilih hasil test —</option>
-          <option value="Lampu menyala selepas diuji"${u.lamputest==='Lampu menyala selepas diuji'?' selected':''}>✅ Lampu menyala selepas diuji</option>
-          <option value="Lampu tidak menyala"${u.lamputest==='Lampu tidak menyala'?' selected':''}>❌ Lampu tidak menyala</option>
+        <label class="lbl" style="font-size:9px;">💡 Lamp Test Result</label>
+        <select onchange="units.find(u=>u.id==${u.id}).lamputest=this.value">
+          <option value="">— Select result —</option>
+          <option value="Lamp lights up after testing"${u.lamputest==='Lamp lights up after testing'?' selected':''}>✅ Lamp lights up after testing</option>
+          <option value="Lamp does not light up"${u.lamputest==='Lamp does not light up'?' selected':''}>❌ Lamp does not light up</option>
         </select>
       </div>
-
       ${procMsg}
-
-      <!-- Dropdowns: Cause, Action, RCA -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:4px;">
         <div class="field" style="margin:0"><label class="lbl" style="font-size:9px;">Cause</label>
           <select onchange="units.find(u=>u.id==${u.id}).cause=this.value">
@@ -1147,204 +1579,67 @@ function renderUnits(){
   updateStatus();
 }
 
-async function capturePhoto(uid, type, input){
+async function capturePhoto(uid,type,input){
   const file=input.files[0]; if(!file) return;
   const unit=units.find(u=>u.id===uid); if(!unit) return;
-
-  // Store file
   unit.files[type]=file;
-
-  // Create thumbnail
-  const url=URL.createObjectURL(file);
   if(!unit.thumbs) unit.thumbs={};
-  unit.thumbs[type]=url;
+  unit.thumbs[type]=URL.createObjectURL(file);
   renderUnits();
-
-  // Trigger AI scan on serial photo immediately
   if(type==='serial'){
     unit.processing=true; renderUnits();
     const fd=new FormData();
-    fd.append(`img__${uid}__${type}`, file);
-    for(const t of ['full','issue']){
-      if(unit.files[t]) fd.append(`img__${uid}__${t}`, unit.files[t]);
-    }
-    try{
-      const r=await fetch('/scan_unit',{method:'POST',body:fd});
-      const d=await r.json();
-      if(d.extracted){
-        unit.extracted=d.extracted;
-        // Auto-fill DAR Information form from label
-        const ex=d.extracted;
-        if(ex.contract)       fillField('f-contract',     ex.contract);
-        if(ex.defmodel)       fillField('f-defmodel',     ex.defmodel);
-        if(ex.delivery_date)  fillField('f-deliverydate', ex.delivery_date);
-        // Show a toast if fields were filled
-        const filled=[];
-        if(ex.contract)      filled.push('Contract');
-        if(ex.defmodel)      filled.push('Def. Model');
-        if(ex.delivery_date) filled.push('Delivery Date');
-        if(ex.serial)        filled.push('Serial');
-        if(filled.length){
-          const msg=document.getElementById('gen-msg');
-          msg.innerHTML=`<div class="sbox s-ok" style="margin-top:8px">🤖 AI auto-filled: ${filled.join(', ')}</div>`;
-          setTimeout(()=>{ msg.innerHTML=''; },4000);
-        }
-      }
-    }catch(e){console.error(e);}
-    unit.processing=false; renderUnits();
-  }
-
-  // If all 3 photos captured and serial not yet extracted — scan again
-  const hasAll=['full','serial','issue'].every(t=>unit.files[t]);
-  if(hasAll && !unit.extracted.serial && !unit.processing){
-    unit.processing=true; renderUnits();
-    const fd=new FormData();
-    for(const t of ['full','serial','issue'])
-      if(unit.files[t]) fd.append(`img__${uid}__${t}`, unit.files[t]);
+    fd.append(`img__${uid}__${type}`,file);
+    for(const t of ['full','issue']) if(unit.files[t]) fd.append(`img__${uid}__${t}`,unit.files[t]);
     try{
       const r=await fetch('/scan_unit',{method:'POST',body:fd});
       const d=await r.json();
       if(d.extracted){
         unit.extracted=d.extracted;
         const ex=d.extracted;
-        if(ex.contract)      fillField('f-contract',     ex.contract);
-        if(ex.defmodel)      fillField('f-defmodel',     ex.defmodel);
-        if(ex.delivery_date) fillField('f-deliverydate', ex.delivery_date);
+        if(ex.contract) fillField('f-contract',ex.contract);
+        if(ex.defmodel) fillField('f-defmodel',ex.defmodel);
+        if(ex.delivery_date) fillField('f-deliverydate',ex.delivery_date);
       }
     }catch(e){}
     unit.processing=false; renderUnits();
   }
 }
 
-function toggleEmailCfg(on){}
-function saveEmailCfg(){}
-
-function switchTab(tab){
-  const isGen = tab==='generate';
-  document.getElementById('tab-generate-content').style.display = isGen?'block':'none';
-  document.getElementById('tab-history-content').style.display  = isGen?'none':'block';
-  document.getElementById('tab-generate').style.background = isGen?'rgba(255,255,255,0.25)':'rgba(255,255,255,0.1)';
-  document.getElementById('tab-generate').style.color      = isGen?'#fff':'rgba(255,255,255,0.7)';
-  document.getElementById('tab-history').style.background  = isGen?'rgba(255,255,255,0.1)':'rgba(255,255,255,0.25)';
-  document.getElementById('tab-history').style.color       = isGen?'rgba(255,255,255,0.7)':'#fff';
-  if(!isGen) loadHistory();
-}
-
-async function loadHistory(){
-  try{
-    const r=await fetch('/history');
-    const data=await r.json();
-    const list=document.getElementById('history-list');
-    document.getElementById('hist-count').textContent=`${data.length} rekod`;
-    if(data.length===0){
-      list.innerHTML='<div class="sbox s-warn">Tiada rekod lagi. Generate DAR dulu!</div>';
-      return;
-    }
-    list.innerHTML=data.map(rec=>`
-      <div class="card" style="margin-bottom:10px;">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
-          <div>
-            <div style="font-size:15px;font-weight:700;color:var(--accent);">🎫 Ticket: ${rec.ticket}</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px;">📅 ${rec.date}</div>
-          </div>
-          <button onclick="deleteRecord('${rec.id}')"
-            style="background:var(--red-bg);color:var(--red);border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;">✕ Buang</button>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;margin-bottom:10px;">
-          <div><span style="color:var(--muted);">📍 Station</span><br><b>${rec.station}</b></div>
-          <div><span style="color:var(--muted);">🔢 Units</span><br><b>${rec.units} unit</b></div>
-          <div><span style="color:var(--muted);">📋 Contract</span><br><b>${rec.contract}</b></div>
-          <div><span style="color:var(--muted);">👷 Staff</span><br><b>${rec.staff}</b></div>
-        </div>
-        <div style="font-size:10px;color:var(--muted);margin-bottom:8px;font-family:monospace;background:var(--bg);padding:4px 8px;border-radius:6px;">${rec.filename}</div>
-        <button onclick="downloadRecord('${rec.id}')"
-          style="width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;">
-          ⬇ Download Excel
-        </button>
-      </div>
-    `).join('');
-  }catch(e){
-    document.getElementById('history-list').innerHTML='<div class="sbox s-err">✗ Error load history</div>';
-  }
-}
-
-function downloadRecord(id){
-  const a=document.createElement('a');
-  a.href=`/download/${id}`;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-}
-
-async function deleteRecord(id){
-  if(!confirm('Delete rekod ni?')) return;
-  await fetch(`/delete/${id}`);
-  loadHistory();
-}
-
-
-
 function updateStatus(){
-  const box=document.getElementById('status-box');
-  if(!ST.tpl){
-    box.className='sbox s-warn'; box.textContent='⚠ Template belum ready — hubungi supervisor';
-  }else if(units.length===0){
-    box.className='sbox s-warn'; box.textContent='⚠ Tambah lantern dan ambik gambar';
-  }else{
-    const ready=units.filter(u=>u.files.serial||u.files.full).length;
-    box.className='sbox s-ok';
-    box.textContent=`✓ ${units.length} unit — ${ready} ada gambar — Sedia generate!`;
-  }
+  const box=document.getElementById('status-box'); if(!box) return;
+  if(units.length===0){box.className='sbox s-warn';box.textContent='⚠ Add at least one lantern to begin';}
+  else{const ready=units.filter(u=>u.files.serial||u.files.full).length;box.className='sbox s-ok';box.textContent=`✓ ${units.length} unit(s) — ${ready} with photos — Ready to generate`;}
 }
 
 async function generate(){
-  if(!ST.tpl){ alert('Template DAR belum ready! Hubungi supervisor.'); return; }
-  if(units.length===0){ alert('Tambah sekurang-kurangnya 1 unit!'); return; }
-
+  if(units.length===0){alert('Add at least one unit!');return;}
   const btn=document.getElementById('gen-btn');
   const prog=document.getElementById('prog');
   const pfill=document.getElementById('pfill');
-  btn.disabled=true; btn.innerHTML='<span class="spin"></span> Generating...';
-  prog.style.display='block'; pfill.style.width='20%';
-
-  // Build multipart payload with all photos + metadata
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Generating...';
+  prog.style.display='block';pfill.style.width='20%';
   const fd=new FormData();
-
-  // Unit metadata
-  const metadata=units.map((u,i)=>({
-    id: u.id, idx: i,
-    extracted: u.extracted,
-    cause: u.cause, action: u.action, rca: u.rca,
-    new_serial: newSerials[i]||''
-  }));
-  fd.append('metadata', JSON.stringify(metadata));
-
-  // Email flag (disabled - no email in this version)
-  fd.append('send_email', 'false');
-
-  // DAR info
+  const metadata=units.map((u,i)=>({id:u.id,idx:i,extracted:u.extracted,cause:u.cause,action:u.action,rca:u.rca,new_serial:''}));
+  fd.append('metadata',JSON.stringify(metadata));
+  fd.append('send_email','false');
   const info={
-    ticket:       document.getElementById('f-ticket').value,
-    contract:     document.getElementById('f-contract').value,
-    station:      document.getElementById('f-station').value,
-    pic:          document.getElementById('f-pic').value,
-    sitedate:     document.getElementById('f-date').value,
-    dono:         document.getElementById('f-dono').value,
-    totalqty:     document.getElementById('f-totalqty').value,
-    defqty:       document.getElementById('f-defqty').value,
-    defmodel:     document.getElementById('f-defmodel').value,
-    newmodel:     document.getElementById('f-newmodel').value,
-    dodate:       document.getElementById('f-deliverydate').value,
-    delivery:     document.getElementById('f-delivery').value,
-    staffname:    document.getElementById('f-staffname').value,
+    ticket:document.getElementById('f-ticket').value,
+    contract:document.getElementById('f-contract').value,
+    station:document.getElementById('f-station').value,
+    pic:document.getElementById('f-pic').value,
+    sitedate:document.getElementById('f-date').value,
+    dono:document.getElementById('f-dono').value,
+    totalqty:document.getElementById('f-totalqty').value,
+    defqty:document.getElementById('f-defqty').value,
+    defmodel:document.getElementById('f-defmodel').value,
+    newmodel:document.getElementById('f-newmodel').value,
+    dodate:document.getElementById('f-deliverydate').value,
+    delivery:document.getElementById('f-delivery').value,
+    staffname:document.getElementById('f-staffname').value,
   };
-  fd.append('info', JSON.stringify(info));
-
-  // Photos per unit
-  for(const u of units){
-    for(const[type,file] of Object.entries(u.files)){
-      if(file) fd.append(`photo__${u.id}__${type}`, file);
-    }
-  }
-
+  fd.append('info',JSON.stringify(info));
+  for(const u of units) for(const[type,file] of Object.entries(u.files)) if(file) fd.append(`photo__${u.id}__${type}`,file);
   pfill.style.width='50%';
   try{
     const r=await fetch('/generate_mobile',{method:'POST',body:fd});
@@ -1355,53 +1650,64 @@ async function generate(){
       const a=document.createElement('a');
       const contract=info.contract.replace(/\//g,'-').replace(/\s/g,'')||'DAR';
       const fname=`DAR_${contract}_${info.ticket||'output'}.xlsx`;
-      a.href=url; a.download=fname;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      window._lastDarBlob=blob; window._lastDarFname=fname;
-      window._lastCollageBlob=null; window._lastCollageFname='';
+      a.href=url;a.download=fname;
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+      window._lastDarBlob=blob;window._lastDarFname=fname;
       pfill.style.width='100%';
-      document.getElementById('gen-msg').innerHTML=
-        `<div class="sbox s-ok" style="margin-top:8px">✓ Berjaya! DAR Excel downloaded (2 sheets: DAR Report + Photos).<br>
-        <button onclick="shareWhatsApp()" style="margin-top:8px;width:100%;background:#25D366;color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.121 1.532 5.847L.057 23.882l6.196-1.624A11.96 11.96 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.96 0-3.794-.5-5.394-1.376L3 21.5l.9-3.474A9.967 9.967 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
-          Hantar ke WhatsApp
+      document.getElementById('gen-msg').innerHTML=`<div class="sbox s-ok" style="margin-top:8px">✓ DAR Excel generated &amp; downloaded successfully!<br>
+        <button onclick="shareWhatsApp()" style="margin-top:8px;width:100%;background:#25D366;color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">
+          Share via WhatsApp
         </button></div>`;
     }else{
       const err=await r.text();
-      document.getElementById('gen-msg').innerHTML=
-        `<div class="sbox s-err" style="margin-top:8px">✗ ${err}</div>`;
+      document.getElementById('gen-msg').innerHTML=`<div class="sbox s-err" style="margin-top:8px">✗ ${err}</div>`;
     }
   }catch(e){
-    document.getElementById('gen-msg').innerHTML=
-      `<div class="sbox s-err" style="margin-top:8px">✗ ${e.message}</div>`;
+    document.getElementById('gen-msg').innerHTML=`<div class="sbox s-err" style="margin-top:8px">✗ ${e.message}</div>`;
   }
-  btn.disabled=false; btn.innerHTML='⬇ Generate DAR Excel';
-  setTimeout(()=>{prog.style.display='none'; pfill.style.width='0';},2000);
+  btn.disabled=false;btn.innerHTML='⬇ Generate DAR Excel';
+  setTimeout(()=>{prog.style.display='none';pfill.style.width='0';},2000);
 }
 
 async function shareWhatsApp(){
-  const darBlob = window._lastDarBlob;
-  if(!darBlob){ alert('File belum ready. Generate dulu!'); return; }
-
-  const files = [new File([darBlob], window._lastDarFname,
-    {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})];
-
-  const ticket  = document.getElementById('f-ticket').value||'';
-  const station = document.getElementById('f-station').value||'';
-  const contract= document.getElementById('f-contract').value||'';
-  const staff   = document.getElementById('f-staffname').value||'';
-  const shareText = `DAR Report - SNFOR SDN BHD\nTicket: ${ticket}\nStation: ${station}\nContract: ${contract}${staff?'\nStaff: '+staff:''}`;
-
-  if(navigator.canShare && navigator.canShare({files})){
-    try{
-      await navigator.share({ files, title: window._lastDarFname, text: shareText });
-      return;
-    }catch(e){
-      if(e.name==='AbortError') return;
-    }
+  const darBlob=window._lastDarBlob;
+  if(!darBlob){alert('Generate report first!');return;}
+  const info={ticket:document.getElementById('f-ticket').value,station:document.getElementById('f-station').value,contract:document.getElementById('f-contract').value,staff:document.getElementById('f-staffname').value};
+  const text=`DAR Report — SNFOR SDN BHD\nTicket: ${info.ticket}\nStation: ${info.station}\nContract: ${info.contract}${info.staff?'\nStaff: '+info.staff:''}`;
+  const files=[new File([darBlob],window._lastDarFname,{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})];
+  if(navigator.canShare&&navigator.canShare({files})){
+    try{await navigator.share({files,title:window._lastDarFname,text});return;}catch(e){if(e.name==='AbortError')return;}
   }
-  window.open(`https://wa.me/?text=${encodeURIComponent(shareText+'\n\nSila semak file yang dah download.')}`, '_blank');
+  window.open(`https://wa.me/?text=${encodeURIComponent(text+'\n\nPlease check downloaded file.')}`, '_blank');
 }
+
+async function loadHistory(){
+  try{
+    const r=await fetch('/history');
+    const data=await r.json();
+    const list=document.getElementById('history-list');
+    document.getElementById('hist-count').textContent=data.length+' reports';
+    if(data.length===0){list.innerHTML='<div class="sbox s-warn">No reports yet.</div>';return;}
+    list.innerHTML=data.map(rec=>`
+      <div class="hist-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+          <div><div style="font-size:16px;font-weight:800;color:var(--navy);">🎫 Ticket #${rec.ticket}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">📅 ${rec.date}</div></div>
+          <button onclick="deleteRecord('${rec.id}')" style="background:var(--red-bg);color:var(--red-text);border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;">Delete</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;margin-bottom:10px;">
+          <div><span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;">Station</span><br><b>${rec.station}</b></div>
+          <div><span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;">Units</span><br><b>${rec.units}</b></div>
+          <div><span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;">Contract</span><br><b>${rec.contract}</b></div>
+          <div><span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;">Staff</span><br><b>${rec.staff}</b></div>
+        </div>
+        <button onclick="downloadRecord('${rec.id}')" style="width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">⬇ Download Excel</button>
+      </div>`).join('');
+  }catch(e){document.getElementById('history-list').innerHTML='<div class="sbox s-err">Error loading reports</div>';}
+}
+
+function downloadRecord(id){const a=document.createElement('a');a.href=`/download/${id}`;document.body.appendChild(a);a.click();document.body.removeChild(a);}
+async function deleteRecord(id){if(!confirm('Delete this report?'))return;await fetch(`/delete/${id}`);loadHistory();}
 </script>
 </body>
 </html>'''
@@ -1638,6 +1944,56 @@ class Handler(BaseHTTPRequestHandler):
                             self._json({'ok':False,'error':'No AI key'})
                         return
             self._json({'ok':False})
+
+        elif path == '/upload_tracking':
+            # Upload new tracking Excel — parse and return tickets JSON
+            try:
+                import openpyxl
+                boundary = ct.split('boundary=')[-1].encode()
+                for part in body.split(b'--'+boundary):
+                    if b'filename=' in part and b'name="file"' in part:
+                        idx = part.find(b'\r\n\r\n')
+                        if idx != -1:
+                            data = part[idx+4:].rstrip(b'\r\n--')
+                            wb2 = openpyxl.load_workbook(io.BytesIO(data), read_only=True, data_only=True)
+                            ws2 = wb2['SMB DAR List - Athena']
+                            tickets = []
+                            for row in ws2.iter_rows(min_row=4, max_row=300, values_only=True):
+                                if not row[1] or str(row[1]).strip() in ['Ticket Number', '']: continue
+                                try:
+                                    ticket = str(int(float(str(row[1]).strip())))
+                                except:
+                                    ticket = str(row[1]).strip()
+                                def sd(v):
+                                    if hasattr(v,'strftime'): return v.strftime('%d/%m/%Y')
+                                    return str(v).strip() if v else ''
+                                defects = []
+                                if row[14]: defects.append('LED Driver')
+                                if row[15]: defects.append('LED Module')
+                                if row[16]: defects.append('LED Driver')
+                                if row[17]: defects.append('SPD')
+                                if row[18]: defects.append('Water Ingression')
+                                defects = list(dict.fromkeys(defects))
+                                tickets.append({
+                                    'ticket': ticket,
+                                    'location': str(row[2] or '').strip(),
+                                    'contract': str(row[3] or '').strip(),
+                                    'model': str(row[4] or '').strip(),
+                                    'reported': sd(row[5]),
+                                    'site_visit': sd(row[7]),
+                                    'serial': str(row[9] or '').strip(),
+                                    'defects': defects,
+                                    'reason': str(row[19] or 'N/A').strip(),
+                                    'status': str(row[26] or 'In Progress').strip(),
+                                    'closed_date': sd(row[27]),
+                                    'do_no': str(row[24] or '').strip(),
+                                    'new_serial': str(row[25] or '').strip().replace('\n',''),
+                                })
+                            self._json({'ok': True, 'tickets': tickets})
+                            return
+                self._json({'ok': False, 'error': 'No file found'})
+            except Exception as e:
+                self._json({'ok': False, 'error': str(e)})
 
         elif path == '/scan_unit':
             # Scan photos for one unit — extract QR + AI data
