@@ -135,11 +135,23 @@ def call_ai_vision(img_b64, prompt):
             raise
     raise Exception("No AI key")
 
-def resize_img(img_bytes, max_size=1200, quality=82):
+def resize_img(img_bytes, max_size=800, quality=65):
     pil = PILImage.open(io.BytesIO(img_bytes)).convert('RGB')
     pil.thumbnail((max_size, max_size), PILImage.LANCZOS)
     buf = io.BytesIO(); pil.save(buf, format='JPEG', quality=quality); buf.seek(0)
     return base64.b64encode(buf.read()).decode()
+
+def compress_photo(img_bytes, max_size=1000, quality=70):
+    """Compress photo for Excel embedding — reduce RAM usage."""
+    try:
+        pil = PILImage.open(io.BytesIO(img_bytes)).convert('RGB')
+        pil.thumbnail((max_size, max_size), PILImage.LANCZOS)
+        buf = io.BytesIO()
+        pil.save(buf, format='JPEG', quality=quality, optimize=True)
+        buf.seek(0)
+        return buf.read()
+    except:
+        return img_bytes
 
 # ─── QR Scanner ────────────────────────────────────────────────────────────────
 def decode_qr(img_bytes):
@@ -177,7 +189,7 @@ def extract_from_serial_photo(img_bytes):
         from PIL import ImageEnhance
         pil = PILImage.open(io.BytesIO(img_bytes)).convert('RGB')
         w, h = pil.size
-        pil2 = pil.resize((min(w*2,2000), min(h*2,2000)), PILImage.LANCZOS)
+        pil2 = pil.resize((min(w*2,1200), min(h*2,1200)), PILImage.LANCZOS)
         pil2 = ImageEnhance.Sharpness(pil2).enhance(3.0)
         pil2 = ImageEnhance.Contrast(pil2).enhance(2.0)
         buf = io.BytesIO(); pil2.save(buf, format='JPEG', quality=90); buf.seek(0)
@@ -223,7 +235,7 @@ def extract_from_email_img(img_bytes):
         pil = PILImage.open(io.BytesIO(img_bytes)).convert('RGB')
         w, h = pil.size
         if w < 1000:
-            pil = pil.resize((w*2, h*2), PILImage.LANCZOS)
+            pil = pil.resize((min(w*2,1200), min(h*2,1200)), PILImage.LANCZOS)
         buf = io.BytesIO(); pil.save(buf, format='JPEG', quality=90); buf.seek(0)
         b64 = base64.b64encode(buf.read()).decode()
 
@@ -321,8 +333,9 @@ def write_merges(ws, merges, base=0):
 def add_image_cell(ws, img_bytes, cfg, block_row):
     """Place image snapped exactly to cell boundaries using TwoCellAnchor."""
     try:
+        img_bytes = compress_photo(img_bytes, max_size=900, quality=65)
         pil = PILImage.open(io.BytesIO(img_bytes)).convert('RGB')
-        buf = io.BytesIO(); pil.save(buf, format='JPEG', quality=85); buf.seek(0)
+        buf = io.BytesIO(); pil.save(buf, format='JPEG', quality=65); buf.seek(0)
         xl = XLImage(buf)
         # block_row is 1-indexed Excel row; convert to 0-indexed for anchor
         br0 = block_row - 1
@@ -637,8 +650,9 @@ def generate_dar(tpl_data, units, new_serials, info, block_data):
                 col2 = ci2 + 3
                 if ptype in imgs2 and imgs2[ptype]:
                     try:
-                        pil2 = PILImage.open(io.BytesIO(imgs2[ptype])).convert('RGB')
-                        ibuf2 = io.BytesIO(); pil2.save(ibuf2, format='JPEG', quality=85); ibuf2.seek(0)
+                        raw2 = compress_photo(imgs2[ptype], max_size=800, quality=65)
+                        pil2 = PILImage.open(io.BytesIO(raw2)).convert('RGB')
+                        ibuf2 = io.BytesIO(); pil2.save(ibuf2, format='JPEG', quality=65); ibuf2.seek(0)
                         xli2 = XLImage(ibuf2)
                         anc2 = TwoCellAnchor(); anc2.editAs = 'twoCell'
                         anc2._from = AnchorMarker(col=col2-1, colOff=cm_to_EMU(0.05), row=row2-1, rowOff=cm_to_EMU(0.05))
@@ -2182,8 +2196,8 @@ class Handler(BaseHTTPRequestHandler):
                                     data = part[idx+4:].rstrip(b'\r\n--')
                                     if len(data) > 100:  # valid image
                                         if uid not in photos: photos[uid] = {}
-                                        photos[uid][itype] = data
-                                        print(f"  Photo received: unit={uid} type={itype} size={len(data)}")
+                                        photos[uid][itype] = compress_photo(data, max_size=1000, quality=70)
+                                        print(f"  Photo received: unit={uid} type={itype} size={len(data)}→{len(photos[uid][itype])}")
                         except Exception as pe:
                             print(f"  Photo parse error: {pe}")
 
